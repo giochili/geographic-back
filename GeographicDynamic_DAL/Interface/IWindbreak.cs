@@ -1,0 +1,20 @@
+﻿using GeographicDynamic_DAL.DTOs.Windbreak;
+using GeographicDynamicWebAPI.Wrappers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GeographicDynamic_DAL.Interface
+{
+    public interface IWindbreak
+    {
+        public Result<bool> RenamePhotosInFolder(RenamePhotoDTO renamePhotoDTO);
+        public Result<bool> ExcelCalculations(ExcelReadDTO excelReadDTO );
+        public Result<DictionaryDTO> GetProjectNames();
+        public Result<DictionaryDTO> getSaxeobaList();
+        public Result<VarjisFartiDTO> GetVarjisFartebi(int AreaNameID);
+        public Result<bool>GetCheckPhotoDate(string folderPath, string resultPath);
+    }
+}
