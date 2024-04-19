@@ -8,6 +8,7 @@ namespace GeographicDynamic_DAL.DTOs.Windbreak
 {
     public class ExcelReadDTO
     {
+
         public string ExcelPath { get; set; }
         public int UnicIDStartNumber { get; set; }
         public string ExcelDestinationPath { get; set; }
@@ -15,6 +16,8 @@ namespace GeographicDynamic_DAL.DTOs.Windbreak
         public int ProjectNameID { get; set; }
         public bool CalcVarjisFartiCheckbox {  get; set; }
         public string AccessShitName {  get; set; }
+        public int ProjectID { get; set; }
+        public int EtapiID { get; set; }
 
     }
 }

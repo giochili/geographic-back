@@ -85,11 +85,7 @@ public partial class QarsafariGrouped
 
     public int Id { get; set; }
 
-    public DateOnly? Aleks { get; set; }
+    public int? ProjectId { get; set; }
 
-    public string? Test1 { get; set; }
-
-    public string? Test2 { get; set; }
-
-    public double? Test3 { get; set; }
+    public int? EtapiId { get; set; }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace GeographicDynamic_DAL.Models;
 
-public partial class Qarsafari
+public partial class QarsafariGroupedArqivi
 {
     public double? UniqId { get; set; }
 
@@ -25,9 +25,11 @@ public partial class Qarsafari
 
     public double? Shrubbery { get; set; }
 
-    public string? WoodyPlantPercent { get; set; }
+    public double? WoodyPlantPercent { get; set; }
 
     public double? WoodyPlantQuantity { get; set; }
+
+    public double? VarjisFarti { get; set; }
 
     public string? WoodyPlantSpecies { get; set; }
 
@@ -73,33 +75,15 @@ public partial class Qarsafari
 
     public string? CadCod { get; set; }
 
-    public int? UniqIdOld { get; set; }
+    public double? UniqIdOld { get; set; }
 
-    public string? UniqIdNew { get; set; }
-
-    public double? ShapeLength { get; set; }
-
-    public string? ShapeArea { get; set; }
+    public double? UniqIdNew { get; set; }
 
     public string? Uid { get; set; }
 
-    public double? VarjisFarti { get; set; }
-
-    public double? DzveliUniqid { get; set; }
-
     public string? Sakutreba { get; set; }
 
-    public string? Rrr { get; set; }
-
-    public double? Gachexili { get; set; }
-
-    public bool? NotinRrr { get; set; }
-
     public int Id { get; set; }
-
-    public string? IsUniqLiterNull { get; set; }
-
-    public double? ChoppedDownQuantity { get; set; }
 
     public int? ProjectId { get; set; }
 

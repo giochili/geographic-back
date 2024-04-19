@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace GeographicDynamic_DAL.Models;
 
-public partial class Qarsafari
+public partial class QarsafariArqivi
 {
     public double? UniqId { get; set; }
 

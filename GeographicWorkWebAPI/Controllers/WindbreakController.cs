@@ -38,6 +38,23 @@ namespace GeographicDynamicWebAPI.Controllers
             if (result.Success) return Ok(result);
             return BadRequest(result);
         }
+
+        [HttpGet("GetEtapiIDList")]
+        public IActionResult GetEtapiIDList()
+        {
+            var result = _windbreak.GetEtapiID();
+            if (result.Success) return Ok(result);
+            return BadRequest(result);
+        }
+
+        [HttpPost ("PostPhotoSplitPaths")]
+        public IActionResult PostPhotoSplitPaths(PhotoSplitDTO photoSplitDTO) 
+        {
+            var result = _windbreak.PhotoSplitKerdzoSaxelmwifo(photoSplitDTO.GadanomriliPhotoFolderPath, photoSplitDTO.DestinationFolderPath);
+            if (result.Success) return Ok(result);
+            return BadRequest(result);
+        }
+
         [HttpGet("getSaxeobaList")]
         public IActionResult getSaxeobaList()
         {

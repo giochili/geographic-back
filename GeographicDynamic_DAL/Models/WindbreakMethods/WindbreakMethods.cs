@@ -39,9 +39,11 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     }
 
 
+
                     GeographicDynamicDbContext.SaveChanges();
 
                 }
+
 
                 return new Result<bool>
                 {
@@ -151,34 +153,35 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                                 }
                                 
                             }
-                            else {
-                                cellValue = (int)cellValue + 1;
-                                Type cellType = cellValue.GetType();
-                                PropertyInfo propertyInfo = typeof(Qarsafari).GetProperty(columnName.Sqlname);
-                                if (propertyInfo != null)
-                                {
+                            //else
+                            //{
+                            //    cellValue = (int)cellValue + 1;
+                            //    Type cellType = cellValue.GetType();
+                            //    PropertyInfo propertyInfo = typeof(Qarsafari).GetProperty(columnName.Sqlname);
+                            //    if (propertyInfo != null)
+                            //    {
 
-                                    // Handle conversion based on cell type
-                                    if (cellType == typeof(double))
-                                    {
-                                        propertyInfo.SetValue(qarsafari, (double)cellValue);
-                                    }
-                                    else if (cellType == typeof(string))
-                                    {
-                                        propertyInfo.SetValue(qarsafari, cellValue);
-                                    }
-                                    else if (cellType == typeof(DateTime))
-                                    {
-                                        DateTime dateTimeValue;
-                                        if (DateTime.TryParse((string)cellValue, out dateTimeValue))
-                                        {
-                                            propertyInfo.SetValue(qarsafari, dateTimeValue);
-                                        }
-                                        // Handle DateTime conversion if necessary
-                                    }
-                                    // Add other type conversions as necessary
-                                }
-                            }
+                            //        // Handle conversion based on cell type
+                            //        if (cellType == typeof(double))
+                            //        {
+                            //            propertyInfo.SetValue(qarsafari, (double)cellValue);
+                            //        }
+                            //        else if (cellType == typeof(string))
+                            //        {
+                            //            propertyInfo.SetValue(qarsafari, cellValue);
+                            //        }
+                            //        else if (cellType == typeof(DateTime))
+                            //        {
+                            //            DateTime dateTimeValue;
+                            //            if (DateTime.TryParse((string)cellValue, out dateTimeValue))
+                            //            {
+                            //                propertyInfo.SetValue(qarsafari, dateTimeValue);
+                            //            }
+                            //            // Handle DateTime conversion if necessary
+                            //        }
+                            //        // Add other type conversions as necessary
+                            //    }
+                            //}
                         }
                     }
                     //qarsafari.UniqId = Convert.ToDouble(xlRange.Cells[i, "A"].Value2);
@@ -389,7 +392,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                             concatenatedString += $"{item.LiterId}-{item.UniqId}";
                         }
 
-                        return new Result<string>
+                        return new Result<string?>
                         {
                             Success = false,
                             // Data = concatenatedString,
@@ -404,7 +407,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
 
 
-                    return new Result<string>
+                    return new Result<string?>
                     {
                         Success = true,
                         //Data = uniqIdsNotInAccessList,
@@ -421,7 +424,8 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 return new Result<string?>
                 {
                     Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "წარუმატებლად შესრულდა შემოწმება access და excel uniqid-ის "
                 };
             }
         }
@@ -1412,7 +1416,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         ExcelWorkSheet.Cells[r + 2, "G"] = qarsafaris[r].CityTownVillage;
                         ExcelWorkSheet.Cells[r + 2, "H"] = qarsafaris[r].LandAreaSqM;
                         ExcelWorkSheet.Cells[r + 2, "I"] = qarsafaris[r].LandAreaHa;
-
+                        ExcelWorkSheet.Cells[r + 2, "V"] = qarsafariGrouped.Date;
                     }
 
 
@@ -1469,7 +1473,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     ExcelWorkSheet.Cells[r + 2, "S"] = qarsafaris[r].Note;
                     ExcelWorkSheet.Cells[r + 2, "T"] = qarsafaris[r].Company;
                     ExcelWorkSheet.Cells[r + 2, "U"] = qarsafaris[r].FieldOperator;
-                    ExcelWorkSheet.Cells[r + 2, "V"] = qarsafaris[r].Date;
+                    //ExcelWorkSheet.Cells[r + 2, "V"] = qarsafaris[r].Date;
                     ExcelWorkSheet.Cells[r + 2, "W"] = qarsafaris[r].GisOperator;
                     ExcelWorkSheet.Cells[r + 2, "X"] = qarsafaris[r].DaTe1;
                     ExcelWorkSheet.Cells[r + 2, "Y"] = qarsafaris[r].OverlapCadCode;
