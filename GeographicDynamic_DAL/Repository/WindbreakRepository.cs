@@ -230,7 +230,7 @@ namespace GeographicDynamic_DAL.Repository
 
                         string uniqIDstr = item.Substring(idxUniqid + 1);
 
-                        //double uniqID = Convert.ToDouble(uniqIDstr);
+                        double uniqID = Convert.ToDouble(uniqIDstr);
 
                         string photoN = "";
 
