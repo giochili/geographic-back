@@ -226,10 +226,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 throw;
             }
         }
-
-
         ////აქ უნდა შემოწმდეს ლიტერი უნიკიდი  თუ მეორედება ექსელში მაშინ აღარ უდნა გააგრძელოს პროცესი 
-
         public Result<double?> ShemowmebaUnicLiterExcelshi()
         {
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
@@ -259,7 +256,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
-
         //// ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს 
         public Result<string?> ShemowmebaAccessExcelUnicLiterDublicats()
         {
@@ -462,7 +458,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
-
+        //ვარჯის ფართების შემოწმება სადაც ხეხილი წერია და ვარჯის ფართი არა 
         public Result<bool> CheckerOfVarjisFartiandSaxeoba()
         {
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
@@ -656,7 +652,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 StatusCode = System.Net.HttpStatusCode.OK
             };
         }
-
         //ამ ფუნქციაზი ხდება შემოწმება UniqID - ების ექსელში და აქსესში 
         // ფუნქცია გამოიყენება რომ მოხდეს Access ფაილიდან წაკითხული მონაცემები და გადასული ინფორმაციის UID ველის შევსება ლიტერის და უნიკაიდის კონკატენაციით 
         public Result<bool> UIDReplaceAccess()
@@ -766,7 +761,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
 
         }
-
+        // ითვლება პროცენტული მაჩვენებელი ხეხილის თუ რამდენია კარგ მდგომარეობაში და ასე შემდეგ 
         public Result<bool> QarsafariProcentisDatvla()
         {
             try
@@ -813,7 +808,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             }
 
         }
-
         //ფუნქცია გამოიყენება რომ დაგაინომროს UNIQ_ID ები ქარსაფარის ცხრილში 
         public Result<bool> QarsafariGadanomrva(int UnicIDStartNumber)
         {
@@ -891,7 +885,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
-
         // აქ გვჭირდება შემმოწმება ფუნქციის ჩაწერა რომელიც გადაამოწმებს თუ სადმე ხეხილი მეორდება უბანზე 
         public Result<bool> QarsafariXexilisShemowmeba()
         {
@@ -946,7 +939,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
-
         //ფუნქცია გამოიყენება რომ დაიგრუპოს ხეხილის სახეობები და ამასთან მიყვეს სხვა პროცედურებიც რაც დაგრუპვაში შედის (პატარა ექსელი) 
         public Result<bool> QarsafariToQarsafariGrouped()
         {
@@ -1096,17 +1088,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         foreach (var qarsafari in qarsafaris)
                         {
 
-
-                            //qarsafari.Sakutreba = qarsafariExcel.Owner == null ? "სახელმწიფო" : qarsafariExcel.Owner;
-                            ////ვითვლით საკუთრებას სადაც NULL ებია რომ შეივსოს ყველასთვის რომ დადუბლირდეს რაც მთავარშია და IsUniqLiterNull არის "true"
-                            //if (qarsafari.Owner == "მუნიციპალიტეტი") //მოწმდება სადმე თუ წერი Owner-ში მუნიციპალიტეტი და იწერება სახელმწიფო საკუთრებაში
-                            //{
-                            //    qarsafari.Sakutreba = "მუნიციპალიტეტი";
-                            //}
-                            //if (qarsafari.Owner == "იურიდიული პირი")//მოწმდება სადმე თუ წერი Owner-ში იურიდიული პირი და იწერება კერძო საკუთრებაში
-                            //{
-                            //    qarsafari.Sakutreba = "იურიდიული პირი";
-                            //}
                             //woodyplantqunatity += qarsafari.WoodyPlantQuantity;
                             // ამაში ამოვაგდეთ გაჩეხილი (chopped_down)
                             merqmcenarisPr += qarsafari.ChoppedDownQuantity != null ? (((qarsafari.WoodyPlantQuantity - qarsafari.ChoppedDownQuantity) * qarsafari.VarjisFarti) / qarsafariExcel.LandAreaSqM) * 100 : ((qarsafari.WoodyPlantQuantity * qarsafari.VarjisFarti) / qarsafariExcel.LandAreaSqM) * 100;
@@ -1196,7 +1177,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
-
         // qarsafariGrouped ცხრილის UID ველის შევსება ლიტერით და უნიკაიდით 
         public Result<bool> UIDReplaceQarsafariGrouped()
         {
@@ -1231,7 +1211,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
-
         //ფუნქცია იმისთვის რომ Access ფაილში ჩაიწეროს QarsafariGroupded-ან 
         public Result<bool> UPDTFromExcelToAccess(string AccessShitName)
         {
@@ -1290,7 +1269,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
-
         // ფუნქცია ყრის მონაცემებს gadanomriliFotoebi-დან qarsafariGroupded-ში 
         public Result<bool> GadanomriliFotoebiToQarsafariGrouped()
         {
@@ -1337,6 +1315,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+        // ექსელში ჩაწერა
         public Result<bool> WriteToExcel(List<Qarsafari> qarsafaris, string ExcelDestinationPath, string ExcelName)
         {
             var GeographicDynamicDbContext = new GeographicDynamicDbContext();
@@ -1417,6 +1396,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         ExcelWorkSheet.Cells[r + 2, "H"] = qarsafaris[r].LandAreaSqM;
                         ExcelWorkSheet.Cells[r + 2, "I"] = qarsafaris[r].LandAreaHa;
                         ExcelWorkSheet.Cells[r + 2, "V"] = qarsafariGrouped.Date;
+                        ExcelWorkSheet.Cells[r + 2, "Z"] = qarsafaris[r].Owner;
                     }
 
 
@@ -1477,7 +1457,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     ExcelWorkSheet.Cells[r + 2, "W"] = qarsafaris[r].GisOperator;
                     ExcelWorkSheet.Cells[r + 2, "X"] = qarsafaris[r].DaTe1;
                     ExcelWorkSheet.Cells[r + 2, "Y"] = qarsafaris[r].OverlapCadCode;
-                    ExcelWorkSheet.Cells[r + 2, "Z"] = qarsafaris[r].Sakutreba;
+                    
                     ExcelWorkSheet.Cells[r + 2, "AA"] = qarsafaris[r].LegalPerson;
                     ExcelWorkSheet.Cells[r + 2, "AB"] = qarsafaris[r].Owners;
                     ExcelWorkSheet.Cells[r + 2, "AC"] = qarsafaris[r].LandFieldOperator;
@@ -1521,8 +1501,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
-
-
         //ფუნქცია კითხულობს ბაზას და ქმნის ახალ ექსელის ფაილს რომ ჩაიწეროს მონაცემები მხოლოდ დაგრუპულისთვის 
         public Result<bool> WriteToExcelGrouped(List<QarsafariGrouped> qarsafariGroupeds, string ExcelDestinationPath, string ExcelName)
         {
@@ -1626,7 +1604,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     ExcelWorkSheet.Cells[r + 2, "W"] = qarsafariGroupeds[r].GisOperator;
                     ExcelWorkSheet.Cells[r + 2, "X"] = qarsafariGroupeds[r].DaTe1;
                     ExcelWorkSheet.Cells[r + 2, "Y"] = qarsafariGroupeds[r].OverlapCadCode;
-                    ExcelWorkSheet.Cells[r + 2, "Z"] = qarsafariGroupeds[r].Sakutreba;
+                    ExcelWorkSheet.Cells[r + 2, "Z"] = qarsafariGroupeds[r].Owner;
                     ExcelWorkSheet.Cells[r + 2, "AA"] = qarsafariGroupeds[r].LegalPerson;
                     ExcelWorkSheet.Cells[r + 2, "AB"] = qarsafariGroupeds[r].Owners;
                     ExcelWorkSheet.Cells[r + 2, "AC"] = qarsafariGroupeds[r].LandFieldOperator;
@@ -1670,14 +1648,12 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             }
 
         }
-
         // ამრგვალებს 5 ის ჯერადზე გადაცემულ რიცხვს
         static int RoundToNearest(double number)
         {
             int i = Convert.ToInt32(number);
             return (i % 5) == 0 ? i : (i % 5) >= 2.5 ? i + 5 - (i % 5) : i - (i % 5);
         }
-
         #endregion
     }
 }
