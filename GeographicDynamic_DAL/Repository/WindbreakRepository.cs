@@ -206,88 +206,89 @@ namespace GeographicDynamic_DAL.Repository
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
             try
             {
-                //var directories = Directory.GetDirectories(GadanomriliPhotoFolderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                GadanomriliFotoebi photo = new GadanomriliFotoebi();
+                var directories = Directory.GetDirectories(GadanomriliPhotoFolderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
 
-                //foreach (var folderPath in directories)
-                //{
-                //    var idxLiter = folderPath.LastIndexOf('\\');
-                //    string literIDstr = folderPath.Substring(idxLiter + 1);
+                foreach (var folderPath in directories)
+                {
+                    var idxLiter = folderPath.LastIndexOf('\\');
+                    string literIDstr = folderPath.Substring(idxLiter + 1);
 
-                //    double literID = Convert.ToDouble(literIDstr);
+                    double literID = Convert.ToDouble(literIDstr);
 
-                //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
 
-                //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-
-
-                //    foreach (var item in list)
-                //    {
-                //        DirectoryInfo d5 = new DirectoryInfo(item);
-                //        FileInfo[] infos1 = d5.GetFiles();
-
-                //        var idxUniqid = item.LastIndexOf('\\');
-
-                //        string uniqIDstr = item.Substring(idxUniqid + 1);
-
-                //        double uniqID = Convert.ToDouble(uniqIDstr);
-
-                //        string photoN = "";
-
-                //        var PhotoDate = "";
-
-                //        photo.UniqId = uniqID;
-                //        bool ismoved = true;
-                //        foreach (FileInfo f6 in infos1)
-                //        {
-                //            if (!f6.Name.Contains(".db"))
-                //            {
-
-                //                QarsafariGrouped? qarsafaritest = windBreakContext.QarsafariGroupeds.FirstOrDefault(m => m.UniqId == uniqID);
-
-                //                // აქ გვჭირდება რომ მოწმდებოდეს მარტო კერძო ან სახელმწიფო რადგან ბაზაში იურიდიული პირიდა მუნიცპალიტეტი აღარაა მარტო კერძო ან სახელმწიფო
-                //                if (qarsafaritest?.Owner == "კერძო" || qarsafaritest?.Owner == "იურიდიული პირი")
-                //                {
-                //                    if (ismoved)
-                //                    {
-
-                //                        photo.LiterId = literID;
-                //                        string destinationFolder = Path.Combine((string.Concat(textBox6.Text + "\\" + "photoSplit" + "\\" + "Kerdzo")), literID.ToString());
-                //                        if (!Directory.Exists(destinationFolder))
-                //                        {
-                //                            Directory.CreateDirectory(destinationFolder);
-                //                        }
-                //                        string destinationFile = Path.Combine(destinationFolder, uniqID.ToString());
-                //                        //File.Copy(item, destinationFile);
-                //                        Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(item, destinationFile);
-
-                //                        ismoved = false;
-                //                    }
-
-                //                }
-                //                if (qarsafaritest?.Owner != "კერძო" && qarsafaritest?.Owner != "იურიდიული პირი")
-                //                {
-                //                    if (ismoved)
-                //                    {
-                //                        photo.LiterId = literID;
+                    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
 
 
-                //                        string destinationFolder = Path.Combine((string.Concat(textBox6.Text + "\\" + "photoSplit" + "\\" + "Saxelmwifo")), literID.ToString());
+                    foreach (var item in list)
+                    {
+                        DirectoryInfo d5 = new DirectoryInfo(item);
+                        FileInfo[] infos1 = d5.GetFiles();
 
-                //                        if (!Directory.Exists(destinationFolder))
-                //                        {
-                //                            Directory.CreateDirectory(destinationFolder);
-                //                        }
-                //                        string destinationFile = Path.Combine(destinationFolder, uniqID.ToString());
-                //                        //File.Copy(item, destinationFile);
-                //                        Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(item, destinationFile);
-                //                        ismoved = false;
-                //                    }
-                //                }
-                //            }
-                //        }
-                //    }
+                        var idxUniqid = item.LastIndexOf('\\');
 
-                //}
+                        string uniqIDstr = item.Substring(idxUniqid + 1);
+
+                        //double uniqID = Convert.ToDouble(uniqIDstr);
+
+                        string photoN = "";
+
+                        var PhotoDate = "";
+
+                        photo.UniqId = uniqIDstr;
+                        bool ismoved = true;
+                        foreach (FileInfo f6 in infos1)
+                        {
+                            if (!f6.Name.Contains(".db"))
+                            {
+
+                                QarsafariGrouped? qarsafaritest = geographicDynamicDbContext.QarsafariGroupeds.FirstOrDefault(m => m.UniqId == uniqID);
+
+                                // აქ გვჭირდება რომ მოწმდებოდეს მარტო კერძო ან სახელმწიფო რადგან ბაზაში იურიდიული პირიდა მუნიცპალიტეტი აღარაა მარტო კერძო ან სახელმწიფო
+                                if (qarsafaritest?.Owner == "კერძო" || qarsafaritest?.Owner == "იურიდიული პირი")
+                                {
+                                    if (ismoved)
+                                    {
+
+                                        photo.LiterId = literID;
+                                        string destinationFolder = Path.Combine((string.Concat(DestinationFolderPath + "\\" + "photoSplit" + "\\" + "Kerdzo")), literID.ToString());
+                                        if (!Directory.Exists(destinationFolder))
+                                        {
+                                            Directory.CreateDirectory(destinationFolder);
+                                        }
+                                        string destinationFile = Path.Combine(destinationFolder, uniqID.ToString());
+                                        //File.Copy(item, destinationFile);
+                                        Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(item, destinationFile);
+
+                                        ismoved = false;
+                                    }
+
+                                }
+                                if (qarsafaritest?.Owner != "კერძო" && qarsafaritest?.Owner != "იურიდიული პირი")
+                                {
+                                    if (ismoved)
+                                    {
+                                        photo.LiterId = literID;
+
+
+                                        string destinationFolder = Path.Combine((string.Concat(DestinationFolderPath + "\\" + "photoSplit" + "\\" + "Saxelmwifo")), literID.ToString());
+
+                                        if (!Directory.Exists(destinationFolder))
+                                        {
+                                            Directory.CreateDirectory(destinationFolder);
+                                        }
+                                        string destinationFile = Path.Combine(destinationFolder, uniqID.ToString());
+                                        //File.Copy(item, destinationFile);
+                                        Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(item, destinationFile);
+                                        ismoved = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
 
             }
             catch(Exception ex)
