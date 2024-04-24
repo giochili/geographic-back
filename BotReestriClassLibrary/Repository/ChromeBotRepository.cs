@@ -84,7 +84,7 @@ namespace BotReestriClassLibrary.Repository
 
 
                                 Microsoft.Office.Interop.Excel.Application xlApp = new Microsoft.Office.Interop.Excel.Application();
-                                Microsoft.Office.Interop.Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(ExcelPath);
+                                Microsoft.Office.Interop.Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(@ExcelPath);
 
                                 string fullPath = "";
 

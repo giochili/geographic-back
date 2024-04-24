@@ -708,6 +708,18 @@ namespace GeographicDynamic_DAL.Repository
             //        Message = UpdateFromAccessToExcellResult.Message
             //    };
             //}
+
+            // შევსება ველების სადაც ვინახავთ რომელი მუნიციპალიტეტია და რომელი ეტაპია დათვლის 
+            var FillProjectEtapiIDSResult = _windbreakMethods.FillProjectEtapiIDS(excelReadDTO.ProjectNameID, excelReadDTO.EtapiID);
+            if (FillProjectEtapiIDSResult.Success = false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა პროექტის სახელის და ეტაპის მინიჭების დროს "
+                };
+            }
             //საკუთრებაში ვწერთ სახელმწიფოა თუ კერძო
             var FillSakutrebaIsKerdzoOrSaxelmwifoResult = FillSakutrebaIsKerdzoOrSaxelmwifo();
             if (FillSakutrebaIsKerdzoOrSaxelmwifoResult.Success == false)
