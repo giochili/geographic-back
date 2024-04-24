@@ -103,6 +103,30 @@ namespace GeographicDynamic_DAL.Repository
                             UnMachedPhotos.Add(numericalPathLitter + " | " + "/" + numericalPath.ToString() + "/" + " |ნაკლები ფოტოა");
                             //MessageBox.Show("მოხდა შეცდომა ფოლდერში 3-ზე ნაკლები ფოტოს ფაილია აღმოჩენილი !");
                         }
+                        // აქ ემატება შემოწმება იმისთვის რომ ინახოს თუ არის 10 ზე მეტი ფოტო ფილდერში და თუ კი მაშინ წაშალოს იმდენი რამდენითაც მეტია 10 ზე 
+                        // წასაშლელად ირჩევა შემთხვევითი პრინციპით რიცხვი მასივში და შენდეგ იშლება
+                        if (photoLength > 10)
+                        {
+                            Random random = new Random();
+                            int filesToDeleteCount = photoLength - 10; // Calculate the number of files to delete
+
+                            for (int i = 0; i < filesToDeleteCount; i++)
+                            {
+                                // Select a random file from the list
+                                int randomIndex = random.Next(files.Count);
+                                string fileToDelete = files[randomIndex];
+
+                                // Delete the file
+                                File.Delete(fileToDelete);
+
+                                // Remove the file from the list
+                                files.RemoveAt(randomIndex);
+                            }
+
+                            // Update photoLength after deletion
+                            photoLength = files.Count;
+                        }
+
 
                     }
                 }
@@ -182,88 +206,89 @@ namespace GeographicDynamic_DAL.Repository
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
             try
             {
-                //var directories = Directory.GetDirectories(GadanomriliPhotoFolderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                GadanomriliFotoebi photo = new GadanomriliFotoebi();
+                var directories = Directory.GetDirectories(GadanomriliPhotoFolderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
 
-                //foreach (var folderPath in directories)
-                //{
-                //    var idxLiter = folderPath.LastIndexOf('\\');
-                //    string literIDstr = folderPath.Substring(idxLiter + 1);
+                foreach (var folderPath in directories)
+                {
+                    var idxLiter = folderPath.LastIndexOf('\\');
+                    string literIDstr = folderPath.Substring(idxLiter + 1);
 
-                //    double literID = Convert.ToDouble(literIDstr);
+                    double literID = Convert.ToDouble(literIDstr);
 
-                //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
 
-                //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-
-
-                //    foreach (var item in list)
-                //    {
-                //        DirectoryInfo d5 = new DirectoryInfo(item);
-                //        FileInfo[] infos1 = d5.GetFiles();
-
-                //        var idxUniqid = item.LastIndexOf('\\');
-
-                //        string uniqIDstr = item.Substring(idxUniqid + 1);
-
-                //        double uniqID = Convert.ToDouble(uniqIDstr);
-
-                //        string photoN = "";
-
-                //        var PhotoDate = "";
-
-                //        photo.UniqId = uniqID;
-                //        bool ismoved = true;
-                //        foreach (FileInfo f6 in infos1)
-                //        {
-                //            if (!f6.Name.Contains(".db"))
-                //            {
-
-                //                QarsafariGrouped? qarsafaritest = windBreakContext.QarsafariGroupeds.FirstOrDefault(m => m.UniqId == uniqID);
-
-                //                // აქ გვჭირდება რომ მოწმდებოდეს მარტო კერძო ან სახელმწიფო რადგან ბაზაში იურიდიული პირიდა მუნიცპალიტეტი აღარაა მარტო კერძო ან სახელმწიფო
-                //                if (qarsafaritest?.Owner == "კერძო" || qarsafaritest?.Owner == "იურიდიული პირი")
-                //                {
-                //                    if (ismoved)
-                //                    {
-
-                //                        photo.LiterId = literID;
-                //                        string destinationFolder = Path.Combine((string.Concat(textBox6.Text + "\\" + "photoSplit" + "\\" + "Kerdzo")), literID.ToString());
-                //                        if (!Directory.Exists(destinationFolder))
-                //                        {
-                //                            Directory.CreateDirectory(destinationFolder);
-                //                        }
-                //                        string destinationFile = Path.Combine(destinationFolder, uniqID.ToString());
-                //                        //File.Copy(item, destinationFile);
-                //                        Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(item, destinationFile);
-
-                //                        ismoved = false;
-                //                    }
-
-                //                }
-                //                if (qarsafaritest?.Owner != "კერძო" && qarsafaritest?.Owner != "იურიდიული პირი")
-                //                {
-                //                    if (ismoved)
-                //                    {
-                //                        photo.LiterId = literID;
+                    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
 
 
-                //                        string destinationFolder = Path.Combine((string.Concat(textBox6.Text + "\\" + "photoSplit" + "\\" + "Saxelmwifo")), literID.ToString());
+                    foreach (var item in list)
+                    {
+                        DirectoryInfo d5 = new DirectoryInfo(item);
+                        FileInfo[] infos1 = d5.GetFiles();
 
-                //                        if (!Directory.Exists(destinationFolder))
-                //                        {
-                //                            Directory.CreateDirectory(destinationFolder);
-                //                        }
-                //                        string destinationFile = Path.Combine(destinationFolder, uniqID.ToString());
-                //                        //File.Copy(item, destinationFile);
-                //                        Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(item, destinationFile);
-                //                        ismoved = false;
-                //                    }
-                //                }
-                //            }
-                //        }
-                //    }
+                        var idxUniqid = item.LastIndexOf('\\');
 
-                //}
+                        string uniqIDstr = item.Substring(idxUniqid + 1);
+
+                        double uniqID = Convert.ToDouble(uniqIDstr);
+
+                        string photoN = "";
+
+                        var PhotoDate = "";
+
+                        photo.UniqId = uniqIDstr;
+                        bool ismoved = true;
+                        foreach (FileInfo f6 in infos1)
+                        {
+                            if (!f6.Name.Contains(".db"))
+                            {
+
+                                QarsafariGrouped? qarsafaritest = geographicDynamicDbContext.QarsafariGroupeds.FirstOrDefault(m => m.UniqId == uniqID);
+
+                                // აქ გვჭირდება რომ მოწმდებოდეს მარტო კერძო ან სახელმწიფო რადგან ბაზაში იურიდიული პირიდა მუნიცპალიტეტი აღარაა მარტო კერძო ან სახელმწიფო
+                                if (qarsafaritest?.Owner == "კერძო" || qarsafaritest?.Owner == "იურიდიული პირი")
+                                {
+                                    if (ismoved)
+                                    {
+
+                                        photo.LiterId = literID;
+                                        string destinationFolder = Path.Combine((string.Concat(DestinationFolderPath + "\\" + "photoSplit" + "\\" + "Kerdzo")), literID.ToString());
+                                        if (!Directory.Exists(destinationFolder))
+                                        {
+                                            Directory.CreateDirectory(destinationFolder);
+                                        }
+                                        string destinationFile = Path.Combine(destinationFolder, uniqID.ToString());
+                                        //File.Copy(item, destinationFile);
+                                        Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(item, destinationFile);
+
+                                        ismoved = false;
+                                    }
+
+                                }
+                                if (qarsafaritest?.Owner != "კერძო" && qarsafaritest?.Owner != "იურიდიული პირი")
+                                {
+                                    if (ismoved)
+                                    {
+                                        photo.LiterId = literID;
+
+
+                                        string destinationFolder = Path.Combine((string.Concat(DestinationFolderPath + "\\" + "photoSplit" + "\\" + "Saxelmwifo")), literID.ToString());
+
+                                        if (!Directory.Exists(destinationFolder))
+                                        {
+                                            Directory.CreateDirectory(destinationFolder);
+                                        }
+                                        string destinationFile = Path.Combine(destinationFolder, uniqID.ToString());
+                                        //File.Copy(item, destinationFile);
+                                        Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(item, destinationFile);
+                                        ismoved = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
 
             }
             catch(Exception ex)
@@ -586,8 +611,8 @@ namespace GeographicDynamic_DAL.Repository
             var AccessShitNameTextbox = excelReadDTO.AccessShitName;
 
 
-            ///////////ფუნქციების გამოძახებები თავის შეცდომიანად თუ სადმე რამე იყო 
-            //// ვკითხულობთ ექსელიდან ინფორმაციას და შეგვაქვს sql ში qarsafari ცხრილი
+            /////////////ფუნქციების გამოძახებები თავის შეცდომიანად თუ სადმე რამე იყო 
+            ////// ვკითხულობთ ექსელიდან ინფორმაციას და შეგვაქვს sql ში qarsafari ცხრილი
             //var ExcelisWakitxvaRestult = _windbreakMethods.ExcelisWakitxva(excelReadDTO);
             //if (ExcelisWakitxvaRestult.Success == false)
             //{
@@ -732,82 +757,82 @@ namespace GeographicDynamic_DAL.Repository
                 };
             }
 
-            var UIDReplaceAccessResult = _windbreakMethods.UIDReplaceAccess();
-            if (UIDReplaceAccessResult.Success == false)
-            {
-                return new Result<bool>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = UIDReplaceAccessResult.Message
-                };
-            }
+            //var UIDReplaceAccessResult = _windbreakMethods.UIDReplaceAccess();
+            //if (UIDReplaceAccessResult.Success == false)
+            //{
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = UIDReplaceAccessResult.Message
+            //    };
+            //}
 
 
-            ////////////axali funqcia UIDREPLACE () {} // table qarsafarshi
-            ////////////SET UID = str([ლიტერი ID]) + str([უნიკ ID]) // str chventan aris Convert.ToString()
-            ///////////// ჯერ არ ვიყიენებთ მარა გამოსაყენებელია ხეხილში ვამოწმებთ დუბლიკატები ხომ არ არის
-            var QarsafariXexilisShemowmebaResult = _windbreakMethods.QarsafariXexilisShemowmeba();
-            if (QarsafariXexilisShemowmebaResult.Success == false)
-            {
-                return new Result<bool>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = QarsafariXexilisShemowmebaResult.Message
-                };
-            }
-
-
-
-            // qarsafari ცხრილის დაგრუპვა uniqid ის მიხედვით და გადატანა qarsafariGrouped ში
-            var QarsafariToQarsafariGroupedResult = _windbreakMethods.QarsafariToQarsafariGrouped();
-            if (QarsafariToQarsafariGroupedResult.Success == false)
-            {
-                return new Result<bool>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = QarsafariToQarsafariGroupedResult.Message
-                };
-            }
+            //////////////axali funqcia UIDREPLACE () {} // table qarsafarshi
+            //////////////SET UID = str([ლიტერი ID]) + str([უნიკ ID]) // str chventan aris Convert.ToString()
+            /////////////// ჯერ არ ვიყიენებთ მარა გამოსაყენებელია ხეხილში ვამოწმებთ დუბლიკატები ხომ არ არის
+            //var QarsafariXexilisShemowmebaResult = _windbreakMethods.QarsafariXexilisShemowmeba();
+            //if (QarsafariXexilisShemowmebaResult.Success == false)
+            //{
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = QarsafariXexilisShemowmebaResult.Message
+            //    };
+            //}
 
 
 
-            var UIDReplaceQarsafariGroupedResult = _windbreakMethods.UIDReplaceQarsafariGrouped();
-            if (UIDReplaceQarsafariGroupedResult.Success == false)
-            {
-                return new Result<bool>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = UIDReplaceQarsafariGroupedResult.Message
-                };
-            }
+            //// qarsafari ცხრილის დაგრუპვა uniqid ის მიხედვით და გადატანა qarsafariGrouped ში
+            //var QarsafariToQarsafariGroupedResult = _windbreakMethods.QarsafariToQarsafariGrouped();
+            //if (QarsafariToQarsafariGroupedResult.Success == false)
+            //{
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = QarsafariToQarsafariGroupedResult.Message
+            //    };
+            //}
 
 
-            var GadanomriliFotoebiToQarsafariGroupedResult = _windbreakMethods.GadanomriliFotoebiToQarsafariGrouped();
-            if (GadanomriliFotoebiToQarsafariGroupedResult.Success == false)
-            {
-                return new Result<bool>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = GadanomriliFotoebiToQarsafariGroupedResult.Message
-                };
-            }
+
+            //var UIDReplaceQarsafariGroupedResult = _windbreakMethods.UIDReplaceQarsafariGrouped();
+            //if (UIDReplaceQarsafariGroupedResult.Success == false)
+            //{
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = UIDReplaceQarsafariGroupedResult.Message
+            //    };
+            //}
 
 
-            var UPDTFromExcelToAccessResult = _windbreakMethods.UPDTFromExcelToAccess(excelReadDTO.AccessShitName);
-            if (UPDTFromExcelToAccessResult.Success == false)
-            {
-                return new Result<bool>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = UPDTFromExcelToAccessResult.Message
-                };
-            }
+            //var GadanomriliFotoebiToQarsafariGroupedResult = _windbreakMethods.GadanomriliFotoebiToQarsafariGrouped();
+            //if (GadanomriliFotoebiToQarsafariGroupedResult.Success == false)
+            //{
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = GadanomriliFotoebiToQarsafariGroupedResult.Message
+            //    };
+            //}
+
+
+            //var UPDTFromExcelToAccessResult = _windbreakMethods.UPDTFromExcelToAccess(excelReadDTO.AccessShitName);
+            //if (UPDTFromExcelToAccessResult.Success == false)
+            //{
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = UPDTFromExcelToAccessResult.Message
+            //    };
+            //}
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
 
             /////////////// ქარსაფარი გრუპდის ცხრილები რომ ამოექსპორტდეს 
