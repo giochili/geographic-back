@@ -386,8 +386,7 @@ namespace GeographicDynamic_DAL.Repository
 
                             // Rename the current folder
                             string folderNameOld = Path.GetFileName(items);
-                            string newFolderName = folderNameOld.Replace("663363", "");
-                           // string newFolderName = folderNameOld.Replace(tempFolderCount.ToString(), "");
+                            string newFolderName = folderNameOld.Replace(tempFolderCount.ToString(), "");
                             if (newFolderName != folderNameOld)
                             {
                                 string newFolderPath = Path.Combine(folderPath, newFolderName);
