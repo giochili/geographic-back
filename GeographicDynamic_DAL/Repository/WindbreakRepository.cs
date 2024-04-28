@@ -361,9 +361,6 @@ namespace GeographicDynamic_DAL.Repository
                         string folderUniqIDPath = Directory.GetDirectories(folderLiterIDPath, item.UniqIdOld.ToString(), SearchOption.AllDirectories).FirstOrDefault();
                         if (!string.IsNullOrEmpty(folderUniqIDPath)) //თუ იპოვა
                         {
-                            ////შევცვალოთ ძველი უნიკიდი ახლით
-                            //string newPath = folderUniqIDPath.Replace(item.UniqIdOld.ToString(), item.UniqId.ToString() + tempFolderCount);
-                            //Directory.Move(folderUniqIDPath, newPath);
 
                             int idx11 = folderUniqIDPath.LastIndexOf('\\');
                             string oldfoldername = folderUniqIDPath.Substring(0, idx11);
