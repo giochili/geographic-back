@@ -860,7 +860,7 @@ namespace GeographicDynamic_DAL.Repository
                 string Sakutrebastore = "";// ინახება მნიშვნელობა როცა isUniqIdLiterIdtrue 
                 foreach (var item in qarsafaris)
                 {
-                    if (item.IsUniqLiterNull == "true" && item.Owner != null)
+                    if (item.IsUniqLiterNull == "true") // && item.Owner != null
                     {
                         if (item.Owner == "მუნიციპალიტეტი" || item.Owner == "სახელმწიფო" || String.IsNullOrEmpty(item.Owner))
                         {
@@ -874,7 +874,7 @@ namespace GeographicDynamic_DAL.Repository
                         }
                     }
 
-                    if (item.IsUniqLiterNull == "false" && item.Owner == null)
+                    if (item.IsUniqLiterNull == "false") // && item.Owner == null
                     {
                         item.Sakutreba = Sakutrebastore;
                     }
