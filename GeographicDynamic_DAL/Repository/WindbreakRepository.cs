@@ -352,30 +352,30 @@ namespace GeographicDynamic_DAL.Repository
                     //}
                     #endregion
                     //გადანომვრის ციკლი შერჩეული რიცხვით სადანაც გვინდა დაიწყოს 
-                    //List<Qarsafari> qarsafarisForRename = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").ToList();
-                    //foreach (var item in qarsafarisForRename)
-                    //{
-                    //    // ჯერ ვეძებთ არჩეულ ფოლდერში ლიტერიდი თი შესაბამის ფოლდერს
-                    //    string folderLiterIDPath = Directory.GetDirectories(renamePhotoDTO.FolderPath, item.LiterId.ToString(), SearchOption.AllDirectories).FirstOrDefault();
-                    //    // ჯერ ვეძებთ არჩეულ ფოლდერში უნიკიდი თი შესაბამის 
-                    //    string folderUniqIDPath = Directory.GetDirectories(folderLiterIDPath, item.UniqIdOld.ToString(), SearchOption.AllDirectories).FirstOrDefault();
-                    //    if (!string.IsNullOrEmpty(folderUniqIDPath)) //თუ იპოვა
-                    //    {
-                    //        ////შევცვალოთ ძველი უნიკიდი ახლით
-                    //        //string newPath = folderUniqIDPath.Replace(item.UniqIdOld.ToString(), item.UniqId.ToString() + tempFolderCount);
-                    //        //Directory.Move(folderUniqIDPath, newPath);
+                    List<Qarsafari> qarsafarisForRename = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").ToList();
+                    foreach (var item in qarsafarisForRename)
+                    {
+                        // ჯერ ვეძებთ არჩეულ ფოლდერში ლიტერიდი თი შესაბამის ფოლდერს
+                        string folderLiterIDPath = Directory.GetDirectories(renamePhotoDTO.FolderPath, item.LiterId.ToString(), SearchOption.AllDirectories).FirstOrDefault();
+                        // ჯერ ვეძებთ არჩეულ ფოლდერში უნიკიდი თი შესაბამის 
+                        string folderUniqIDPath = Directory.GetDirectories(folderLiterIDPath, item.UniqIdOld.ToString(), SearchOption.AllDirectories).FirstOrDefault();
+                        if (!string.IsNullOrEmpty(folderUniqIDPath)) //თუ იპოვა
+                        {
+                            ////შევცვალოთ ძველი უნიკიდი ახლით
+                            //string newPath = folderUniqIDPath.Replace(item.UniqIdOld.ToString(), item.UniqId.ToString() + tempFolderCount);
+                            //Directory.Move(folderUniqIDPath, newPath);
 
-                    //        int idx11 = folderUniqIDPath.LastIndexOf('\\');
-                    //        string oldfoldername = folderUniqIDPath.Substring(0, idx11);
-                    //        string newnamefolder = oldfoldername + "\\" + Convert.ToString(item.UniqId.ToString() + tempFolderCount);
-                    //        Directory.Move(folderUniqIDPath, newnamefolder);
+                            int idx11 = folderUniqIDPath.LastIndexOf('\\');
+                            string oldfoldername = folderUniqIDPath.Substring(0, idx11);
+                            string newnamefolder = oldfoldername + "\\" + Convert.ToString(item.UniqId.ToString() + tempFolderCount);
+                            Directory.Move(folderUniqIDPath, newnamefolder);
 
-                    //    }
-                    //    else // თუ ვერ იპოვა
-                    //    {
-                    //        return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "უნიკიდ ვერ მოიძებნა ფოლდერებში"};
-                    //    }
-                    //}
+                        }
+                        else // თუ ვერ იპოვა
+                        {
+                            return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "უნიკიდ ვერ მოიძებნა ფოლდერებში" };
+                        }
+                    }
                     // რომ დასრულდება ბოლოს ფოლდერის სახელებს უნდა ჩამოვაჭრათ ბოლო 6 სიმბოლო რაც წინასწარ დავუმატეთ
                     foreach (var folderPath in directories)
                     {                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
