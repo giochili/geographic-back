@@ -18,6 +18,8 @@ namespace GeographicDynamic_DAL.DTOs.Windbreak
         public string AccessShitName {  get; set; }
         public int ProjectID { get; set; }
         public int EtapiID { get; set; }
-
+        public string FolderPath { get; set; }
+        public int PhotoStartNumber { get; set; }
+        public bool Gadanomrilia { get; set; }
     }
 }
