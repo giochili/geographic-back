@@ -492,7 +492,7 @@ namespace GeographicDynamic_DAL.Repository
             }
             catch (Exception ex)
             {
-                return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "ჩტო ტა ნიტო" };
+                return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = ex + "ჩტო ტა ნიტო" };
             }
             #endregion
 
@@ -613,7 +613,7 @@ namespace GeographicDynamic_DAL.Repository
             }
 
             //aq unda fotoebi renamephotos
-            if (excelReadDTO.GadanomriliaFotoebi)
+            if (excelReadDTO.GadanomriliaFotoebi != true)
             {
                 RenamePhotoDTO renamePhotoDTOForRename = new RenamePhotoDTO();
                 renamePhotoDTOForRename.FolderPath = excelReadDTO.FolderPath;
