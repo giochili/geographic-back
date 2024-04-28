@@ -21,5 +21,6 @@ namespace GeographicDynamic_DAL.DTOs.Windbreak
         public string FolderPath { get; set; }
         public int PhotoStartNumber { get; set; }
         public bool Gadanomrilia { get; set; }
+        public bool GadanomriliaFotoebi { get; set; }
     }
 }

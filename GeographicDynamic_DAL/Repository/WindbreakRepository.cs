@@ -616,18 +616,21 @@ namespace GeographicDynamic_DAL.Repository
             }
 
             //aq unda fotoebi renamephotos
-            RenamePhotoDTO renamePhotoDTOForRename = new RenamePhotoDTO();
-            renamePhotoDTOForRename.FolderPath = excelReadDTO.FolderPath;
-            renamePhotoDTOForRename.PhotoStartNumber = excelReadDTO.PhotoStartNumber;
-            var RenamePhotosInFolderFromExcel = RenamePhotosInFolder(renamePhotoDTOForRename);
-            if (RenamePhotosInFolderFromExcel.Success == false)
+            if (excelReadDTO.GadanomriliaFotoebi)
             {
-                return new Result<bool>
+                RenamePhotoDTO renamePhotoDTOForRename = new RenamePhotoDTO();
+                renamePhotoDTOForRename.FolderPath = excelReadDTO.FolderPath;
+                renamePhotoDTOForRename.PhotoStartNumber = excelReadDTO.PhotoStartNumber;
+                var RenamePhotosInFolderFromExcel = RenamePhotosInFolder(renamePhotoDTOForRename);
+                if (RenamePhotosInFolderFromExcel.Success == false)
                 {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = RenamePhotosInFolderFromExcel.Message
-                };
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = RenamePhotosInFolderFromExcel.Message
+                    };
+                }
             }
             //aq unda fotoebi renamephotos
 
