@@ -22,7 +22,9 @@ using System.Threading.Tasks;
 using static Azure.Core.HttpHeader;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using GeographicDynamic_DAL.Models.WindbreakMethods;
-
+//using static System.Net.Mime.MediaTypeNames;
+using System.Drawing;
+using System.Drawing.Imaging;
 namespace GeographicDynamic_DAL.Repository
 {
     public class WindbreakRepository : IWindbreak
@@ -71,21 +73,49 @@ namespace GeographicDynamic_DAL.Repository
 
                         int photoLength = 0;
                         bool photoebiaremtxveva = false;
+
+
+                        Image myImageFirst = Image.FromFile(files[0]);
+                        PropertyItem propItemFirst = myImageFirst.GetPropertyItem(306);
+                        DateTime dtakenFirst;
+                        //// ახლა ვიღებთ data taken ს პირველი ფოტო სურათის რათა შევადაროთ დანარჩენებს
+                        string sdateFirst = Encoding.UTF8.GetString(propItemFirst.Value).Trim();
+                        string secondhalfFirst = sdateFirst.Substring(sdateFirst.IndexOf(" "), (sdateFirst.Length - sdateFirst.IndexOf(" ")));
+                        string firsthalfFirst = sdateFirst.Substring(0, 10);
+                        firsthalfFirst = firsthalfFirst.Replace(":", "-");
+                        sdateFirst = firsthalfFirst + secondhalfFirst;
+                        DateTime firstFileDate = DateTime.Parse(sdateFirst);
+                        string formattedDate = firstFileDate.ToString("MM/dd/yy");
+
                         foreach (var file in files)
                         {
+                            Image myImage = Image.FromFile(@file);
+                            PropertyItem propItem = myImage.GetPropertyItem(306);
+                            DateTime dtaken;
 
+                            //Convert date taken metadata to a DateTime object
+                            string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
+                            string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
+                            string firsthalf = sdate.Substring(0, 10);
+                            firsthalf = firsthalf.Replace(":", "-");
+                            sdate = firsthalf + secondhalf;
+                            dtaken = DateTime.Parse(sdate);
                             //DateTime firstFileDate = File.GetCreationTime(files[0]); // შექმნის თარიღი (გადაკოპირების)    
-                            DateTime firstFileDate = File.GetLastWriteTime(files[0]); // მოდიფიკაციის თარიღი( გადაღების) 
-                            string formattedDate = firstFileDate.ToString("MM/dd/yy");
+                            //აქ ვიღებდით modify date-ს 
+                            //DateTime firstFileDate = File.GetLastWriteTime(files[0]); // მოდიფიკაციის თარიღი( გადაღების) 
+                            //string formattedDate = firstFileDate.ToString("MM/dd/yy");
+                            
 
                             photoLength++;
                             var extensionTest = Path.GetExtension(file);
 
                             //DateTime fileDate = File.GetCreationTime(file);
-                            DateTime fileDate = File.GetLastWriteTime(file);
+                            //DateTime fileDate = File.GetLastWriteTime(file);
 
 
-                            string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
+
+                           // string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
+                            string formattedDateToCompare = dtaken.ToString("MM/dd/yy");
 
                             if (formattedDateToCompare != formattedDate && !photoebiaremtxveva)
                             {
@@ -370,14 +400,14 @@ namespace GeographicDynamic_DAL.Repository
                         }
                         else // თუ ვერ იპოვა
                         {
-                            return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "უნიკიდ ვერ მოიძებნა ფოლდერებში" };
+                            return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "უნიკიდ" + item.UniqIdOld.ToString() + " ვერ მოიძებნა ფოლდერებში" };
                         }
                     }
                     // რომ დასრულდება ბოლოს ფოლდერის სახელებს უნდა ჩამოვაჭრათ ბოლო 6 სიმბოლო რაც წინასწარ დავუმატეთ
                     foreach (var folderPath in directories)
                     {                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
-                        var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-                        var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                        var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
+                        var list = directories1.OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
                         foreach (var items in list)
                         {
 
@@ -433,8 +463,8 @@ namespace GeographicDynamic_DAL.Repository
 
                     double literID = Convert.ToDouble(literIDstr);
 
-                    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-                    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
+                    var list = directories1.OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
 
                     foreach (var item in list)
                     {
@@ -455,21 +485,34 @@ namespace GeographicDynamic_DAL.Repository
                             if (!f6.Name.Contains(".db"))
                             {
                                 var ext = Path.GetExtension(f6.FullName);
-                                File.Move(f6.FullName, f6.FullName.Replace(f6.Name, Convert.ToString(photocount) + ext));
-
+                                var newPhotoNamePath = f6.FullName.Replace(f6.Name, Convert.ToString(photocount) + ext);
+                                File.Move(f6.FullName, newPhotoNamePath);
 
                                 photoN += Convert.ToString(photocount) + "/";
-
-
 
                                 //ფოტოს თარიღის წამოღება
                                 bool isWritten = false;
                                 if (!isWritten)
                                 {
-                                    var modifiedDate1 = f6.LastWriteTime;
+                                    //var modifiedDate1 = f6.LastWriteTime;
+                                    //ვიღებთ ფოტოს data taken-ს modify თარიღის ნაცვლად
+                                    Image myImage = Image.FromFile(@newPhotoNamePath);
+                                    PropertyItem propItem = myImage.GetPropertyItem(306);
+                                    DateTime dtaken;
+
+                                    //Convert date taken metadata to a DateTime object
+                                    string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
+                                    string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
+                                    string firsthalf = sdate.Substring(0, 10);
+                                    firsthalf = firsthalf.Replace(":", "-");
+                                    sdate = firsthalf + secondhalf;
+                                    dtaken = DateTime.Parse(sdate);
+
                                     var formatInfo = new CultureInfo("en-US").DateTimeFormat;
                                     formatInfo.DateSeparator = "-";
-                                    PhotoDate = modifiedDate1.ToString("dd-MM-yyyy", formatInfo);
+                                    //PhotoDate = modifiedDate1.ToString("dd-MM-yyyy", formatInfo);
+                                    //ვიღებთ ფოტოს data taken-ს modify თარიღის ნაცვლად
+                                    PhotoDate = dtaken.ToString("dd-MM-yyyy", formatInfo);
                                 }
                                 isWritten = true;
                                 photocount++;

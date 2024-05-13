@@ -335,7 +335,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         Success = false,
                         //Data = uniqIdsNotInAccessList,
                         StatusCode = System.Net.HttpStatusCode.BadGateway,
-                        Message = "მოხდა შეცდომა ! Excel UniqId  !"
+                        Message = "მოხდა შეცდომა ! Excel UniqId  !: " + uniqIdsNotInAccessList
                     };
                 }
 
@@ -674,7 +674,12 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "აქსესის წაკითხვის მოხდა შეცდომა ! " + ex.Message
+                    };
                 }
                 // The connection is automatically closed becasuse of using block.    
             }
@@ -1176,6 +1181,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         qarsafariGrouped.LandGisOperator = qarsafariExcel.LandGisOperator;
                         qarsafariGrouped.Date = qarsafariExcel.Date;
                         qarsafariGrouped.GisOperator = qarsafariExcel.GisOperator;
+                        qarsafariGrouped.FieldOperator = qarsafariExcel.FieldOperator;
                         qarsafariGrouped.DaTe1 = qarsafariExcel.DaTe1;
                         qarsafariGrouped.OverlapCadCode = qarsafariExcel.OverlapCadCode;
                         qarsafariGrouped.Owner = qarsafariExcel.Owner;
@@ -1570,7 +1576,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 ExcelWorkSheet.Cells[1, "O"] = "In_good_condition";
                 ExcelWorkSheet.Cells[1, "P"] = "chopped_down";
                 ExcelWorkSheet.Cells[1, "Q"] = "rampike";
-                ExcelWorkSheet.Cells[1, "R"] = "species_medium_age";
+                ExcelWorkSheet.Cells[1, "R"] = "species_medium_age"; 
                 ExcelWorkSheet.Cells[1, "S"] = "Note_";
                 ExcelWorkSheet.Cells[1, "T"] = "Company";
                 ExcelWorkSheet.Cells[1, "U"] = "Field_Operator";
