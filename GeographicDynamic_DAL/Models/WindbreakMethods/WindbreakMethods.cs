@@ -465,7 +465,40 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+        // ფუნქცია გამოიყენება რომ შეავსოს ველები სადაც გვიწერია პროექტის(მუნიციპალიტეტის) დასახელება და ეტაპის ნუმერაცია 
+        public Result<string?> FillProjectEtapiIDS(int ProjectNameID,int EtapiID)
+        {
+            try
+            {
+                GeographicDynamicDbContext GeographicDynamicDbContext = new GeographicDynamicDbContext();
+
+                List<Qarsafari> qarsafaris = GeographicDynamicDbContext.Qarsafaris.ToList();
+
+
+                foreach (var item in qarsafaris)
+                {
+                    item.ProjectId = ProjectNameID;
+                    item.EtapiId = EtapiID;
+                    GeographicDynamicDbContext.SaveChanges();
+                }
+
+
+                return new Result<string?> { Success = true, StatusCode = System.Net.HttpStatusCode.OK };
+
+            }
+            catch
+            {
+                return new Result<string?>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "წარუმატებლად შესრულდა ProjectID da EtapiID ჩაწერა "
+                };
+            }
+        }
+
         //ეს ფუნქცია მიდის და ქარსაფარის ცხრილში სახეობების მიხედვით აკეთებს ვარჯის ფართების ჩაწერას
+
         public Result<bool> ChaweraVarjisParti(int ProjectNameID)
         {
             try

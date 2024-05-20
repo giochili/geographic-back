@@ -667,15 +667,27 @@ namespace GeographicDynamic_DAL.Repository
                 };
             }
 
-            // გადაგვაქვს ინფორმაცია აქსესიდან ექსელში
-            var UpdateFromAccessToExcellResult = _windbreakMethods.UpdateFromAccessToExcell();
-            if (UpdateFromAccessToExcellResult.Success == false)
+            //// გადაგვაქვს ინფორმაცია აქსესიდან ექსელში
+            //var UpdateFromAccessToExcellResult = _windbreakMethods.UpdateFromAccessToExcell();
+            //if (UpdateFromAccessToExcellResult.Success == false)
+            //{
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = UpdateFromAccessToExcellResult.Message
+            //    };
+            //}
+
+            // შევსება ველების სადაც ვინახავთ რომელი მუნიციპალიტეტია და რომელი ეტაპია დათვლის 
+            var FillProjectEtapiIDSResult = _windbreakMethods.FillProjectEtapiIDS(excelReadDTO.ProjectNameID, excelReadDTO.EtapiID);
+            if (FillProjectEtapiIDSResult.Success = false)
             {
                 return new Result<bool>
                 {
                     Success = false,
                     StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = UpdateFromAccessToExcellResult.Message
+                    Message = "მოხდა შეცდომა პროექტის სახელის და ეტაპის მინიჭების დროს "
                 };
             }
             //საკუთრებაში ვწერთ სახელმწიფოა თუ კერძო
