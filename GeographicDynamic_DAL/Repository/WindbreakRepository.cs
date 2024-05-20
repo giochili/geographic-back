@@ -317,86 +317,7 @@ namespace GeographicDynamic_DAL.Repository
         //ფოტოების გადანომრვის ფუნქციონალი ეშვება აქ 
         public Result<bool> RenamePhotosInFolder(RenamePhotoDTO renamePhotoDTO)
         {
-            #region ALEKSANDRE
-            //try
-            //{
-            //    int photocount = renamePhotoDTO.PhotoStartNumber;
 
-            //    var directories = Directory.GetDirectories(@renamePhotoDTO.FolderPath).OrderBy(filePath => Convert.ToString(Path.GetFileNameWithoutExtension(filePath)));
-            //    foreach (var folderPath in directories)
-            //    {
-            //        //var idxLiter = folderPath.LastIndexOf('\\');
-            //        //string literIDstr = folderPath.Substring(idxLiter + 1);
-
-            //        //double literID = Convert.ToDouble(literIDstr);
-
-            //        var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToString(Path.GetFileNameWithoutExtension(filePath)));
-
-            //        var list = directories1.OrderBy(filePath => Convert.ToString(Path.GetFileNameWithoutExtension(filePath)));
-
-
-            //        foreach (var item in list)
-            //        {
-            //            DirectoryInfo d5 = new DirectoryInfo(item);
-
-            //            FileInfo[] infos1 = d5.GetFiles();
-
-            //            var idxUniqid = item.LastIndexOf('\\');
-            //            string uniqIDstr = item.Substring(idxUniqid + 1);
-
-            //            string photoN = "";
-
-            //            var PhotoDate = "";
-            //            // ფოტოების გადასანომრი ციკლი 
-            //            foreach (FileInfo f6 in infos1)
-            //            {
-            //                if (!f6.Name.Contains(".db"))
-            //                {
-            //                    var ext = Path.GetExtension(f6.FullName);
-            //                    File.Move(f6.FullName, f6.FullName.Replace(f6.Name, Convert.ToString(photocount) + ext));
-
-
-
-            //                    photoN += Convert.ToString(photocount) + "/";
-
-            //                    //ფოტოს თარიღის წამოღება
-            //                    bool isWritten = false;
-            //                    if (!isWritten)
-            //                    {
-            //                        //var modifiedDate1 = f6.LastWriteTime;
-            //                        //var formatInfo = new CultureInfo("en-US").DateTimeFormat;
-            //                        //formatInfo.DateSeparator = "-";
-            //                        //PhotoDate = modifiedDate1.ToString("dd-MM-yyyy", formatInfo);
-            //                    }
-            //                    isWritten = true;
-            //                    photocount++;
-
-            //                }
-            //            }
-
-            //            //// SQL ბაზაში დამატება და ცვლილებების დამახსოვრება 
-            //            //GadanomriliFotoebi photo = new GadanomriliFotoebi();
-            //            //photo.UniqId = uniqIDstr;
-            //            //photo.LiterId = 1;
-            //            //photo.PhotoN = photoN;
-            //            //photo.PhotoDate = PhotoDate;
-            //            //windBreakContext.GadanomriliFotoebis.Add(photo);
-            //            //windBreakContext.SaveChanges();
-
-            //            //}
-
-            //        }
-
-            //    }
-
-            //    return new Result<bool> { Value = true, StatusCode = System.Net.HttpStatusCode.OK, Message = "წარმატებით გადაინომრა" };
-            //}
-            //catch (Exception ex)
-            //{
-            //    return new Result<bool> { Value = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "ჩტო ტა ნიტო" };
-            //}
-
-            #endregion
             #region GIORGI
             //var directories = Directory.GetDirectories(renamePhotoDTO.FolderPath).OrderBy(filePath => Convert.ToString(Path.GetFileNameWithoutExtension(filePath)));
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
@@ -408,7 +329,6 @@ namespace GeographicDynamic_DAL.Repository
             int photocount = renamePhotoDTO.PhotoStartNumber;
             var random = new Random();
             var tempFolderCount = random.Next(100000, 999999);
-
             if (renamePhotoDTO.Gadanomrilia == false)
             {
 
@@ -613,16 +533,16 @@ namespace GeographicDynamic_DAL.Repository
 
             /////////////ფუნქციების გამოძახებები თავის შეცდომიანად თუ სადმე რამე იყო 
             ////// ვკითხულობთ ექსელიდან ინფორმაციას და შეგვაქვს sql ში qarsafari ცხრილი
-            //var ExcelisWakitxvaRestult = _windbreakMethods.ExcelisWakitxva(excelReadDTO);
-            //if (ExcelisWakitxvaRestult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა ექსელის წაკითხვის დროს" + ExcelisWakitxvaRestult.Message
-            //    };
-            //}
+            var ExcelisWakitxvaRestult = _windbreakMethods.ExcelisWakitxva(excelReadDTO);
+            if (ExcelisWakitxvaRestult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა ექსელის წაკითხვის დროს" + ExcelisWakitxvaRestult.Message
+                };
+            }
             ////ვამოწმებთ Excel-ში თუ არის დუპლიკატი Unic-Liter-ID -ები
             //var ShemowmebaUnicLiterExcelshiResult = _windbreakMethods.ShemowmebaUnicLiterExcelshi();
             //if (ShemowmebaUnicLiterExcelshiResult.Success == false)
@@ -634,8 +554,6 @@ namespace GeographicDynamic_DAL.Repository
             //        Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + ShemowmebaUnicLiterExcelshiResult.Message
             //    };
             //}
-
-
 
             //// ვკითხულობთ აქსესიდან ინფორმაციას და შეგვაქვს sql ში WindbreakMDB ცხრილი
             //if (AccessShitNameTextbox != "")
@@ -700,127 +618,154 @@ namespace GeographicDynamic_DAL.Repository
             //    };
             //}
 
-            //var QarsafariGadanomrvaResult = _windbreakMethods.QarsafariGadanomrva(excelReadDTO.UnicIDStartNumber);
-            //if (QarsafariGadanomrvaResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = QarsafariGadanomrvaResult.Message
-            //    };
-            //}
+            var QarsafariGadanomrvaResult = _windbreakMethods.QarsafariGadanomrva(excelReadDTO.UnicIDStartNumber);
+            if (QarsafariGadanomrvaResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = QarsafariGadanomrvaResult.Message
+                };
+            }
 
-            //var ProcentisDatvlaResult = _windbreakMethods.QarsafariProcentisDatvla();
-            //if (ProcentisDatvlaResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = ProcentisDatvlaResult.Message
-            //    };
-            //}
+            // აქ უკვე გავაკეთოთ თუ დაჩეკილია ფოტოების გადანომვრა დეფოლტად იყოს დაჩეკილი
+            // თუ დაჩეკილია გადავნომრავთ
+            //ექსელის ახალი უნიკიდი უნდა ჩავწეროთ ფოლდერის  პაპკის უნიკიდიში
+            // და ჯოინი ხდება არსებული ფოლდერის უნიკიდი = ექსელის ძველი უნიკიდი
+            // აქ უნდა შევინარჩუნოთ ლოგიკა რომ ყველას ვუწერთ 00000 დუბლიკატები რომ გამოვრიცხოთ
 
-            //// გადაგვაქვს ინფორმაცია აქსესიდან ექსელში
-            //var UpdateFromAccessToExcellResult = _windbreakMethods.UpdateFromAccessToExcell();
-            //if (UpdateFromAccessToExcellResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UpdateFromAccessToExcellResult.Message
-            //    };
-            //}
-            ////საკუთრებაში ვწერთ სახელმწიფოა თუ კერძო
-            //var FillSakutrebaIsKerdzoOrSaxelmwifoResult = FillSakutrebaIsKerdzoOrSaxelmwifo();
-            //if (FillSakutrebaIsKerdzoOrSaxelmwifoResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა საკუთრების მინიჭების დროს "
-            //    };
-            //}
-
-            //var UIDReplaceAccessResult = _windbreakMethods.UIDReplaceAccess();
-            //if (UIDReplaceAccessResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UIDReplaceAccessResult.Message
-            //    };
-            //}
+            //ექსელის ძველი უნიკიდებით ვეძებთ ფოლდერებში უნიკიდიებს თავისთავად რომელ ლიტერშია და ვუწერთ ექსელის ახალ უნიკიდს
+            // და თუ ძველ უნიკიდის ვერ ვიპოვით ვერცერთ ლიტერში მაშინ ERROR ! და აღარ უნდა გააგრძელოს და გამოიტანოს ის ლიტერი უნიკიდი რაც ვერ იპოვა ფოტოებში
 
 
-            //////////////axali funqcia UIDREPLACE () {} // table qarsafarshi
-            //////////////SET UID = str([ლიტერი ID]) + str([უნიკ ID]) // str chventan aris Convert.ToString()
-            /////////////// ჯერ არ ვიყიენებთ მარა გამოსაყენებელია ხეხილში ვამოწმებთ დუბლიკატები ხომ არ არის
-            //var QarsafariXexilisShemowmebaResult = _windbreakMethods.QarsafariXexilisShemowmeba();
-            //if (QarsafariXexilisShemowmebaResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = QarsafariXexilisShemowmebaResult.Message
-            //    };
-            //}
+            RenamePhotoDTO renamePhotoDTOTEST = new RenamePhotoDTO();
+            renamePhotoDTOTEST.FolderPath = excelReadDTO.FolderPath;
+
+
+            var GadanomvraFolderebisExcelidanResult = RenamePhotosInFolder(renamePhotoDTOTEST);
+            //var GadanomvraFolderebisExcelidanResult = _windbreakMethods.GadanomvraFolderebisExcelidan(RenamePhotoDTO renamePhotoDTO);
+            if (GadanomvraFolderebisExcelidanResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = GadanomvraFolderebisExcelidanResult.Message
+                };
+            }
+               
+
+            var ProcentisDatvlaResult = _windbreakMethods.QarsafariProcentisDatvla();
+            if (ProcentisDatvlaResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = ProcentisDatvlaResult.Message
+                };
+            }
+
+            // გადაგვაქვს ინფორმაცია აქსესიდან ექსელში
+            var UpdateFromAccessToExcellResult = _windbreakMethods.UpdateFromAccessToExcell();
+            if (UpdateFromAccessToExcellResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UpdateFromAccessToExcellResult.Message
+                };
+            }
+            //საკუთრებაში ვწერთ სახელმწიფოა თუ კერძო
+            var FillSakutrebaIsKerdzoOrSaxelmwifoResult = FillSakutrebaIsKerdzoOrSaxelmwifo();
+            if (FillSakutrebaIsKerdzoOrSaxelmwifoResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა საკუთრების მინიჭების დროს "
+                };
+            }
+
+            var UIDReplaceAccessResult = _windbreakMethods.UIDReplaceAccess();
+            if (UIDReplaceAccessResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UIDReplaceAccessResult.Message
+                };
+            }
+
+
+            ////////////axali funqcia UIDREPLACE () {} // table qarsafarshi
+            ////////////SET UID = str([ლიტერი ID]) + str([უნიკ ID]) // str chventan aris Convert.ToString()
+            ///////////// ჯერ არ ვიყიენებთ მარა გამოსაყენებელია ხეხილში ვამოწმებთ დუბლიკატები ხომ არ არის
+            var QarsafariXexilisShemowmebaResult = _windbreakMethods.QarsafariXexilisShemowmeba();
+            if (QarsafariXexilisShemowmebaResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = QarsafariXexilisShemowmebaResult.Message
+                };
+            }
 
 
 
-            //// qarsafari ცხრილის დაგრუპვა uniqid ის მიხედვით და გადატანა qarsafariGrouped ში
-            //var QarsafariToQarsafariGroupedResult = _windbreakMethods.QarsafariToQarsafariGrouped();
-            //if (QarsafariToQarsafariGroupedResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = QarsafariToQarsafariGroupedResult.Message
-            //    };
-            //}
+            // qarsafari ცხრილის დაგრუპვა uniqid ის მიხედვით და გადატანა qarsafariGrouped ში
+            var QarsafariToQarsafariGroupedResult = _windbreakMethods.QarsafariToQarsafariGrouped();
+            if (QarsafariToQarsafariGroupedResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = QarsafariToQarsafariGroupedResult.Message
+                };
+            }
 
 
 
-            //var UIDReplaceQarsafariGroupedResult = _windbreakMethods.UIDReplaceQarsafariGrouped();
-            //if (UIDReplaceQarsafariGroupedResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UIDReplaceQarsafariGroupedResult.Message
-            //    };
-            //}
+            var UIDReplaceQarsafariGroupedResult = _windbreakMethods.UIDReplaceQarsafariGrouped();
+            if (UIDReplaceQarsafariGroupedResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UIDReplaceQarsafariGroupedResult.Message
+                };
+            }
 
 
-            //var GadanomriliFotoebiToQarsafariGroupedResult = _windbreakMethods.GadanomriliFotoebiToQarsafariGrouped();
-            //if (GadanomriliFotoebiToQarsafariGroupedResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = GadanomriliFotoebiToQarsafariGroupedResult.Message
-            //    };
-            //}
+            var GadanomriliFotoebiToQarsafariGroupedResult = _windbreakMethods.GadanomriliFotoebiToQarsafariGrouped();
+            if (GadanomriliFotoebiToQarsafariGroupedResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = GadanomriliFotoebiToQarsafariGroupedResult.Message
+                };
+            }
 
 
-            //var UPDTFromExcelToAccessResult = _windbreakMethods.UPDTFromExcelToAccess(excelReadDTO.AccessShitName);
-            //if (UPDTFromExcelToAccessResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UPDTFromExcelToAccessResult.Message
-            //    };
-            //}
+            var UPDTFromExcelToAccessResult = _windbreakMethods.UPDTFromExcelToAccess(excelReadDTO.AccessShitName);
+            if (UPDTFromExcelToAccessResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UPDTFromExcelToAccessResult.Message
+                };
+            }
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
 
             /////////////// ქარსაფარი გრუპდის ცხრილები რომ ამოექსპორტდეს 

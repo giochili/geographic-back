@@ -151,7 +151,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                                     }
                                     // Add other type conversions as necessary
                                 }
-                                
+
                             }
                             //else
                             //{
@@ -226,6 +226,46 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 throw;
             }
         }
+
+
+    //    public Result<bool> GadanomvraFolderebisExcelidan()
+    //    {
+
+    //        GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
+    //        List<Qarsafari> distinctUniqIds = geographicDynamicDbContext.Qarsafaris
+    //.Where(x => x.IsUniqLiterNull == "true")
+    //.OrderBy(x => x.UniqId)
+    ////.Select(x => new {UniqId = x.UniqId, LiterId = x.LiterId, UniqIdOld = x.UniqIdOld })
+    //.ToList();
+    //        var FolderPath = renamePhotoDTO.FolderPath;
+
+
+    //        try
+    //        {
+    //            return new Result<bool>
+    //            {
+    //                Success = true,
+    //                // Data = uniqIdsNotInAccessList,
+    //                StatusCode = System.Net.HttpStatusCode.OK,
+    //                Message = "წარმატებით დასრულდა შემოწმება Excel-ში UniqId-ის "
+    //            };
+
+    //        }
+    //        catch
+    //        {
+    //            return new Result<bool>
+    //            {
+    //                Success = false,
+    //                StatusCode = System.Net.HttpStatusCode.BadGateway,
+    //                Message = "წარუმატებლად დასრულდა შემოწმება Excel-ში UniqId-ის "
+
+    //            };
+    //        }
+
+    //    }
+
+
+
         ////აქ უნდა შემოწმდეს ლიტერი უნიკიდი  თუ მეორედება ექსელში მაშინ აღარ უდნა გააგრძელოს პროცესი 
         public Result<double?> ShemowmebaUnicLiterExcelshi()
         {
@@ -1457,7 +1497,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     ExcelWorkSheet.Cells[r + 2, "W"] = qarsafaris[r].GisOperator;
                     ExcelWorkSheet.Cells[r + 2, "X"] = qarsafaris[r].DaTe1;
                     ExcelWorkSheet.Cells[r + 2, "Y"] = qarsafaris[r].OverlapCadCode;
-                    
+
                     ExcelWorkSheet.Cells[r + 2, "AA"] = qarsafaris[r].LegalPerson;
                     ExcelWorkSheet.Cells[r + 2, "AB"] = qarsafaris[r].Owners;
                     ExcelWorkSheet.Cells[r + 2, "AC"] = qarsafaris[r].LandFieldOperator;

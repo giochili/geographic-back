@@ -19,5 +19,9 @@ namespace GeographicDynamic_DAL.DTOs.Windbreak
         public int ProjectID { get; set; }
         public int EtapiID { get; set; }
 
+        //ფოტოების გადასანომრად ველები
+        public string FolderPath { get; set; }
+        public int PhotoStartNumber { get; set; }
+
     }
 }
