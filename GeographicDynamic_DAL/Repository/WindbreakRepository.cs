@@ -25,7 +25,6 @@ using GeographicDynamic_DAL.Models.WindbreakMethods;
 //using static System.Net.Mime.MediaTypeNames;
 using System.Drawing;
 using System.Drawing.Imaging;
-using static System.Net.Mime.MediaTypeNames;
 namespace GeographicDynamic_DAL.Repository
 {
     public class WindbreakRepository : IWindbreak
@@ -105,7 +104,7 @@ namespace GeographicDynamic_DAL.Repository
                             //აქ ვიღებდით modify date-ს 
                             //DateTime firstFileDate = File.GetLastWriteTime(files[0]); // მოდიფიკაციის თარიღი( გადაღების) 
                             //string formattedDate = firstFileDate.ToString("MM/dd/yy");
-
+                            
 
                             photoLength++;
                             var extensionTest = Path.GetExtension(file);
@@ -115,7 +114,7 @@ namespace GeographicDynamic_DAL.Repository
 
 
 
-                            // string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
+                           // string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
                             string formattedDateToCompare = dtaken.ToString("MM/dd/yy");
 
                             if (formattedDateToCompare != formattedDate && !photoebiaremtxveva)

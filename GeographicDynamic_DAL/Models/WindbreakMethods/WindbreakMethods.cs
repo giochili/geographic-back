@@ -1576,7 +1576,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 ExcelWorkSheet.Cells[1, "O"] = "In_good_condition";
                 ExcelWorkSheet.Cells[1, "P"] = "chopped_down";
                 ExcelWorkSheet.Cells[1, "Q"] = "rampike";
-                ExcelWorkSheet.Cells[1, "R"] = "species_medium_age";
+                ExcelWorkSheet.Cells[1, "R"] = "species_medium_age"; 
                 ExcelWorkSheet.Cells[1, "S"] = "Note_";
                 ExcelWorkSheet.Cells[1, "T"] = "Company";
                 ExcelWorkSheet.Cells[1, "U"] = "Field_Operator";
