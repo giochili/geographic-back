@@ -22,7 +22,10 @@ using System.Threading.Tasks;
 using static Azure.Core.HttpHeader;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using GeographicDynamic_DAL.Models.WindbreakMethods;
-
+//using static System.Net.Mime.MediaTypeNames;
+using System.Drawing;
+using System.Drawing.Imaging;
+using static System.Net.Mime.MediaTypeNames;
 namespace GeographicDynamic_DAL.Repository
 {
     public class WindbreakRepository : IWindbreak
@@ -71,21 +74,49 @@ namespace GeographicDynamic_DAL.Repository
 
                         int photoLength = 0;
                         bool photoebiaremtxveva = false;
+
+
+                        Image myImageFirst = Image.FromFile(files[0]);
+                        PropertyItem propItemFirst = myImageFirst.GetPropertyItem(306);
+                        DateTime dtakenFirst;
+                        //// ახლა ვიღებთ data taken ს პირველი ფოტო სურათის რათა შევადაროთ დანარჩენებს
+                        string sdateFirst = Encoding.UTF8.GetString(propItemFirst.Value).Trim();
+                        string secondhalfFirst = sdateFirst.Substring(sdateFirst.IndexOf(" "), (sdateFirst.Length - sdateFirst.IndexOf(" ")));
+                        string firsthalfFirst = sdateFirst.Substring(0, 10);
+                        firsthalfFirst = firsthalfFirst.Replace(":", "-");
+                        sdateFirst = firsthalfFirst + secondhalfFirst;
+                        DateTime firstFileDate = DateTime.Parse(sdateFirst);
+                        string formattedDate = firstFileDate.ToString("MM/dd/yy");
+
                         foreach (var file in files)
                         {
+                            Image myImage = Image.FromFile(@file);
+                            PropertyItem propItem = myImage.GetPropertyItem(306);
+                            DateTime dtaken;
 
+                            //Convert date taken metadata to a DateTime object
+                            string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
+                            string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
+                            string firsthalf = sdate.Substring(0, 10);
+                            firsthalf = firsthalf.Replace(":", "-");
+                            sdate = firsthalf + secondhalf;
+                            dtaken = DateTime.Parse(sdate);
                             //DateTime firstFileDate = File.GetCreationTime(files[0]); // შექმნის თარიღი (გადაკოპირების)    
-                            DateTime firstFileDate = File.GetLastWriteTime(files[0]); // მოდიფიკაციის თარიღი( გადაღების) 
-                            string formattedDate = firstFileDate.ToString("MM/dd/yy");
+                            //აქ ვიღებდით modify date-ს 
+                            //DateTime firstFileDate = File.GetLastWriteTime(files[0]); // მოდიფიკაციის თარიღი( გადაღების) 
+                            //string formattedDate = firstFileDate.ToString("MM/dd/yy");
+
 
                             photoLength++;
                             var extensionTest = Path.GetExtension(file);
 
                             //DateTime fileDate = File.GetCreationTime(file);
-                            DateTime fileDate = File.GetLastWriteTime(file);
+                            //DateTime fileDate = File.GetLastWriteTime(file);
 
 
-                            string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
+
+                            // string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
+                            string formattedDateToCompare = dtaken.ToString("MM/dd/yy");
 
                             if (formattedDateToCompare != formattedDate && !photoebiaremtxveva)
                             {
@@ -198,8 +229,6 @@ namespace GeographicDynamic_DAL.Repository
                 };
             }
         }
-
-
         //ფოტოების გაყოფის ფუნცქია 
         public Result<bool> PhotoSplitKerdzoSaxelmwifo(string GadanomriliPhotoFolderPath, string DestinationFolderPath)
         {
@@ -291,7 +320,7 @@ namespace GeographicDynamic_DAL.Repository
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new Result<bool>
                 {
@@ -312,12 +341,9 @@ namespace GeographicDynamic_DAL.Repository
             };
         }
 
-
-
         //ფოტოების გადანომრვის ფუნქციონალი ეშვება აქ 
         public Result<bool> RenamePhotosInFolder(RenamePhotoDTO renamePhotoDTO)
         {
-
             #region GIORGI
             //var directories = Directory.GetDirectories(renamePhotoDTO.FolderPath).OrderBy(filePath => Convert.ToString(Path.GetFileNameWithoutExtension(filePath)));
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
@@ -325,119 +351,105 @@ namespace GeographicDynamic_DAL.Repository
             geographicDynamicDbContext.GadanomriliFotoebis.ExecuteDelete();
             var directories = Directory.GetDirectories(renamePhotoDTO.FolderPath).OrderBy(filePath => int.Parse(Path.GetFileNameWithoutExtension(filePath)));
 
-            int foldercount = renamePhotoDTO.FolderStartNumber;
+            //int foldercount = renamePhotoDTO.FolderStartNumber;
             int photocount = renamePhotoDTO.PhotoStartNumber;
             var random = new Random();
             var tempFolderCount = random.Next(100000, 999999);
+
             if (renamePhotoDTO.Gadanomrilia == false)
             {
-
-                ////test for _ 
-
-                //foreach (var directory in directories)
-                //{
-                //    var directories1 = Directory.GetDirectories(directory).OrderBy(filePath => Convert.ToString(Path.GetFileNameWithoutExtension(filePath)));
-                //    var list = directories1.OrderBy(filePath => Convert.ToString(Path.GetFileNameWithoutExtension(filePath)));
-                //    foreach (var item in list)
-                //    {
-                //        int idx2 = item.LastIndexOf('\\');
-                //        var kk2 = Convert.ToString(item.Substring(idx2 + 1));
-                //        if (kk2.Contains("_"))
-                //        {
-                //           var splited = kk2.Split("_");
-
-                //            if (splited.Length == 2 && int.TryParse(splited[0], out int start) && int.TryParse(splited[1], out int end))
-                //            {
-                //                for (int i = start; i <= end; i++)
-                //                {
-                //                    string newFolderPath = Path.Combine(directory, $"{i}");
-                //                    if (!Directory.Exists(newFolderPath))
-                //                    {
-                //                        // Create the new folder
-                //                        Directory.CreateDirectory(newFolderPath);
-                //                        Console.WriteLine("Folder created successfully.");
-
-                //                        string sourceDirectory = Path.Combine(directory, kk2); 
-                //                        string[] imageFiles = Directory.GetFiles(sourceDirectory);
-                //                        foreach (string imageFile in imageFiles)
-                //                        {
-
-                //                            string fileName = Path.GetFileName(imageFile);
-                //                            string destinationFile = Path.Combine(newFolderPath, fileName);
-                //                            File.Copy(imageFile, destinationFile, true);
-                //                            Console.WriteLine($"Copied {fileName} to {newFolderPath}");
-                //                        }
-
-                //                    }
-                //                }
-                //                Directory.Delete(Path.Combine(directory, kk2), true);
-                //            }
-
-                //        }
-
-                //    }
-
-                //}
-                ////Test end 
-
-
-
-
-
                 try
                 {
-                    //ფაილების გადანომვრა 
+                    #region აქ კეთდება წინასწარ რანდომ რიცხვის მიმატება ფოლდდერების სახელებს მანამ გადანომვრას დავიწყებთ
+                    ////ფაილების გადანომვრა 
+                    //foreach (var folderPath in directories)
+                    //{                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
+                    //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    //    foreach (var items in list)
+                    //    {
+                    //        var idx = items.LastIndexOf('\\');
+                    //        string kk = items.Substring(idx + 1);
+
+                    //        var newname = items.Replace(kk, Convert.ToString(foldercount)); //es mushaobs
+
+                    //        int idx11 = items.LastIndexOf('\\');
+                    //        string oldfoldername = items.Substring(0, idx11);
+                    //        string newnamefolder = oldfoldername + "\\" + tempFolderCount; //ჯერ ეს უნდა გავუშვათ 
+
+                    //        Directory.Move(items, newnamefolder);
+                    //        tempFolderCount++;
+                    //    }
+                    //}
+                    #endregion
+                    //გადანომვრის ციკლი შერჩეული რიცხვით სადანაც გვინდა დაიწყოს 
+                    List<Qarsafari> qarsafarisForRename = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").ToList();
+                    foreach (var item in qarsafarisForRename)
+                    {
+                        // ჯერ ვეძებთ არჩეულ ფოლდერში ლიტერიდი თი შესაბამის ფოლდერს
+                        string folderLiterIDPath = Directory.GetDirectories(renamePhotoDTO.FolderPath, item.LiterId.ToString(), SearchOption.AllDirectories).FirstOrDefault();
+                        // ჯერ ვეძებთ არჩეულ ფოლდერში უნიკიდი თი შესაბამის 
+                        string folderUniqIDPath = Directory.GetDirectories(folderLiterIDPath, item.UniqIdOld.ToString(), SearchOption.AllDirectories).FirstOrDefault();
+                        if (!string.IsNullOrEmpty(folderUniqIDPath)) //თუ იპოვა
+                        {
+
+                            int idx11 = folderUniqIDPath.LastIndexOf('\\');
+                            string oldfoldername = folderUniqIDPath.Substring(0, idx11);
+                            string newnamefolder = oldfoldername + "\\" + Convert.ToString(item.UniqId.ToString() + tempFolderCount);
+                            Directory.Move(folderUniqIDPath, newnamefolder);
+
+                        }
+                        else // თუ ვერ იპოვა
+                        {
+                            return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "უნიკიდ" + item.UniqIdOld.ToString() + " ვერ მოიძებნა ფოლდერებში" };
+                        }
+                    }
+                    // რომ დასრულდება ბოლოს ფოლდერის სახელებს უნდა ჩამოვაჭრათ ბოლო 6 სიმბოლო რაც წინასწარ დავუმატეთ
                     foreach (var folderPath in directories)
                     {                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
-
-                        var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-                        var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                        var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
+                        var list = directories1.OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
                         foreach (var items in list)
                         {
-                            var idx = items.LastIndexOf('\\');
-                            string kk = items.Substring(idx + 1);
 
+                            // Rename the current folder
+                            string folderNameOld = Path.GetFileName(items);
+                            string newFolderName = folderNameOld.Replace(tempFolderCount.ToString(), "");
+                            if (newFolderName != folderNameOld)
+                            {
+                                string newFolderPath = Path.Combine(folderPath, newFolderName);
 
-                            var newname = items.Replace(kk, Convert.ToString(foldercount)); //es mushaobs
-
-                            int idx11 = items.LastIndexOf('\\');
-                            string oldfoldername = items.Substring(0, idx11);
-                            string newnamefolder = oldfoldername + "\\" + tempFolderCount; //ჯერ ეს უნდა გავუშვათ 
-
-                            Directory.Move(items, newnamefolder);
-                            tempFolderCount++;
+                                Directory.Move(items, newFolderPath);
+                            }
 
                         }
                     }
 
-                    //გადანომვრის ციკლი შერჩეული რიცხვით სადანაც გვინდა დაიწყოს 
-                    foreach (var folderPath in directories)
-                    {
-                        int idx2 = folderPath.LastIndexOf('\\');
-                        var kk2 = Convert.ToInt32(folderPath.Substring(idx2 + 1));
+                    //// ძველი გადანომვრა
+                    //foreach (var folderPath in directories)
+                    //{
+                    //    int idx2 = folderPath.LastIndexOf('\\');
+                    //    var kk2 = Convert.ToInt32(folderPath.Substring(idx2 + 1));
 
-                        var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
 
-                        var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
 
-                        foreach (var items in list)
-                        {
-                            var idx = items.LastIndexOf('\\');
-                            string kk = items.Substring(idx + 1);
+                    //    foreach (var items in list)
+                    //    {
+                    //        var idx = items.LastIndexOf('\\');
+                    //        string kk = items.Substring(idx + 1);
 
+                    //        var newname = items.Replace(kk, Convert.ToString(foldercount)); //es mushaobs
 
-                            var newname = items.Replace(kk, Convert.ToString(foldercount)); //es mushaobs
+                    //        int idx11 = items.LastIndexOf('\\');
+                    //        string oldfoldername = items.Substring(0, idx11);
+                    //        string newnamefolder = oldfoldername + "\\" + Convert.ToString(foldercount);
+                    //        Directory.Move(items, newnamefolder);
 
-                            int idx11 = items.LastIndexOf('\\');
-                            string oldfoldername = items.Substring(0, idx11);
-                            string newnamefolder = oldfoldername + "\\" + Convert.ToString(foldercount);
-                            Directory.Move(items, newnamefolder);
-
-                            foldercount++;
-
-                        }
-                    }
-
+                    //        foldercount++;
+                    //    }
+                    //}
                 }
                 catch (Exception ex) { }
             }
@@ -452,8 +464,8 @@ namespace GeographicDynamic_DAL.Repository
 
                     double literID = Convert.ToDouble(literIDstr);
 
-                    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-                    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
+                    var list = directories1.OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
 
                     foreach (var item in list)
                     {
@@ -474,21 +486,34 @@ namespace GeographicDynamic_DAL.Repository
                             if (!f6.Name.Contains(".db"))
                             {
                                 var ext = Path.GetExtension(f6.FullName);
-                                File.Move(f6.FullName, f6.FullName.Replace(f6.Name, Convert.ToString(photocount) + ext));
-
+                                var newPhotoNamePath = f6.FullName.Replace(f6.Name, Convert.ToString(photocount) + ext);
+                                File.Move(f6.FullName, newPhotoNamePath);
 
                                 photoN += Convert.ToString(photocount) + "/";
-
-
 
                                 //ფოტოს თარიღის წამოღება
                                 bool isWritten = false;
                                 if (!isWritten)
                                 {
-                                    var modifiedDate1 = f6.LastWriteTime;
+                                    //var modifiedDate1 = f6.LastWriteTime;
+                                    //ვიღებთ ფოტოს data taken-ს modify თარიღის ნაცვლად
+                                    Image myImage = Image.FromFile(@newPhotoNamePath);
+                                    PropertyItem propItem = myImage.GetPropertyItem(306);
+                                    DateTime dtaken;
+
+                                    //Convert date taken metadata to a DateTime object
+                                    string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
+                                    string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
+                                    string firsthalf = sdate.Substring(0, 10);
+                                    firsthalf = firsthalf.Replace(":", "-");
+                                    sdate = firsthalf + secondhalf;
+                                    dtaken = DateTime.Parse(sdate);
+
                                     var formatInfo = new CultureInfo("en-US").DateTimeFormat;
                                     formatInfo.DateSeparator = "-";
-                                    PhotoDate = modifiedDate1.ToString("dd-MM-yyyy", formatInfo);
+                                    //PhotoDate = modifiedDate1.ToString("dd-MM-yyyy", formatInfo);
+                                    //ვიღებთ ფოტოს data taken-ს modify თარიღის ნაცვლად
+                                    PhotoDate = dtaken.ToString("dd-MM-yyyy", formatInfo);
                                 }
                                 isWritten = true;
                                 photocount++;
@@ -511,7 +536,7 @@ namespace GeographicDynamic_DAL.Repository
             }
             catch (Exception ex)
             {
-                return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "ჩტო ტა ნიტო" };
+                return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = ex + "ჩტო ტა ნიტო" };
             }
             #endregion
 
@@ -543,80 +568,82 @@ namespace GeographicDynamic_DAL.Repository
                     Message = "მოხდა შეცდომა ექსელის წაკითხვის დროს" + ExcelisWakitxvaRestult.Message
                 };
             }
-            ////ვამოწმებთ Excel-ში თუ არის დუპლიკატი Unic-Liter-ID -ები
-            //var ShemowmebaUnicLiterExcelshiResult = _windbreakMethods.ShemowmebaUnicLiterExcelshi();
-            //if (ShemowmebaUnicLiterExcelshiResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + ShemowmebaUnicLiterExcelshiResult.Message
-            //    };
-            //}
+            //ვამოწმებთ Excel-ში თუ არის დუპლიკატი Unic-Liter-ID -ები
+            var ShemowmebaUnicLiterExcelshiResult = _windbreakMethods.ShemowmebaUnicLiterExcelshi();
+            if (ShemowmebaUnicLiterExcelshiResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + ShemowmebaUnicLiterExcelshiResult.Message
+                };
+            }
 
-            //// ვკითხულობთ აქსესიდან ინფორმაციას და შეგვაქვს sql ში WindbreakMDB ცხრილი
-            //if (AccessShitNameTextbox != "")
-            //{
-            //    var AccessReadingResult = _windbreakMethods.AccessWakitxva(excelReadDTO.AccessFilePath, excelReadDTO.AccessShitName);
 
-            //    if (AccessReadingResult.Success == false)
-            //    {
-            //        return new Result<bool>
-            //        {
-            //            Success = false,
-            //            StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //            Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + AccessReadingResult.Message
-            //        };
-            //    }
-            //}
 
-            /////////////////ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს
-            //var ShemowmebaAccessExcelUnicLiterDublicatsResult = _windbreakMethods.ShemowmebaAccessExcelUnicLiterDublicats();
-            //if (ShemowmebaAccessExcelUnicLiterDublicatsResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = ShemowmebaAccessExcelUnicLiterDublicatsResult.Message + " ზედმეტია: " + ShemowmebaAccessExcelUnicLiterDublicatsResult.Data
-            //    };
-            //}
+            // ვკითხულობთ აქსესიდან ინფორმაციას და შეგვაქვს sql ში WindbreakMDB ცხრილი
+            if (AccessShitNameTextbox != "")
+            {
+                var AccessReadingResult = _windbreakMethods.AccessWakitxva(excelReadDTO.AccessFilePath, excelReadDTO.AccessShitName);
 
-            //if (CalcVarjisFartiCheckbox == true)
-            //{
-            //    var ChaweraVarjisPartiFunction = _windbreakMethods.ChaweraVarjisParti(excelReadDTO.ProjectNameID);
+                if (AccessReadingResult.Success == false)
+                {
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + AccessReadingResult.Message
+                    };
+                }
+            }
 
-            //    if (ChaweraVarjisPartiFunction.Success == false)
-            //    {
-            //        return new Result<bool>
-            //        {
-            //            Success = false,
-            //            StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //            Message = "ვარჯის ფართის დათვლის დროს მოხდა შეცდომა" + ChaweraVarjisPartiFunction.Message
-            //        };
-            //    }
-            //}
-            //var CheckerOfVarjisFartiandSaxeobaResult = _windbreakMethods.CheckerOfVarjisFartiandSaxeoba();
-            //if (CheckerOfVarjisFartiandSaxeobaResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა ვარჯის ფართის ჩაწერისას " + CheckerOfVarjisFartiandSaxeobaResult.Message
-            //    };
-            //}
-            //var UIDReplaceExcelResult = _windbreakMethods.UIDReplaceExcel();
-            //if (UIDReplaceExcelResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა ექსელში UID-ის ჩაწერის დროს" + UIDReplaceExcelResult.Message
-            //    };
-            //}
+            ///////////////ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს
+            var ShemowmebaAccessExcelUnicLiterDublicatsResult = _windbreakMethods.ShemowmebaAccessExcelUnicLiterDublicats();
+            if (ShemowmebaAccessExcelUnicLiterDublicatsResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = ShemowmebaAccessExcelUnicLiterDublicatsResult.Message + " ზედმეტია: " + ShemowmebaAccessExcelUnicLiterDublicatsResult.Data
+                };
+            }
+
+            if (CalcVarjisFartiCheckbox == true)
+            {
+                var ChaweraVarjisPartiFunction = _windbreakMethods.ChaweraVarjisParti(excelReadDTO.ProjectNameID);
+
+                if (ChaweraVarjisPartiFunction.Success == false)
+                {
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "ვარჯის ფართის დათვლის დროს მოხდა შეცდომა" + ChaweraVarjisPartiFunction.Message
+                    };
+                }
+            }
+            var CheckerOfVarjisFartiandSaxeobaResult = _windbreakMethods.CheckerOfVarjisFartiandSaxeoba();
+            if (CheckerOfVarjisFartiandSaxeobaResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა ვარჯის ფართის ჩაწერისას " + CheckerOfVarjisFartiandSaxeobaResult.Message
+                };
+            }
+            var UIDReplaceExcelResult = _windbreakMethods.UIDReplaceExcel();
+            if (UIDReplaceExcelResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა ექსელში UID-ის ჩაწერის დროს" + UIDReplaceExcelResult.Message
+                };
+            }
 
             var QarsafariGadanomrvaResult = _windbreakMethods.QarsafariGadanomrva(excelReadDTO.UnicIDStartNumber);
             if (QarsafariGadanomrvaResult.Success == false)
@@ -629,32 +656,24 @@ namespace GeographicDynamic_DAL.Repository
                 };
             }
 
-            // აქ უკვე გავაკეთოთ თუ დაჩეკილია ფოტოების გადანომვრა დეფოლტად იყოს დაჩეკილი
-            // თუ დაჩეკილია გადავნომრავთ
-            //ექსელის ახალი უნიკიდი უნდა ჩავწეროთ ფოლდერის  პაპკის უნიკიდიში
-            // და ჯოინი ხდება არსებული ფოლდერის უნიკიდი = ექსელის ძველი უნიკიდი
-            // აქ უნდა შევინარჩუნოთ ლოგიკა რომ ყველას ვუწერთ 00000 დუბლიკატები რომ გამოვრიცხოთ
-
-            //ექსელის ძველი უნიკიდებით ვეძებთ ფოლდერებში უნიკიდიებს თავისთავად რომელ ლიტერშია და ვუწერთ ექსელის ახალ უნიკიდს
-            // და თუ ძველ უნიკიდის ვერ ვიპოვით ვერცერთ ლიტერში მაშინ ERROR ! და აღარ უნდა გააგრძელოს და გამოიტანოს ის ლიტერი უნიკიდი რაც ვერ იპოვა ფოტოებში
-
-
-            RenamePhotoDTO renamePhotoDTOTEST = new RenamePhotoDTO();
-            renamePhotoDTOTEST.FolderPath = excelReadDTO.FolderPath;
-
-
-            var GadanomvraFolderebisExcelidanResult = RenamePhotosInFolder(renamePhotoDTOTEST);
-            //var GadanomvraFolderebisExcelidanResult = _windbreakMethods.GadanomvraFolderebisExcelidan(RenamePhotoDTO renamePhotoDTO);
-            if (GadanomvraFolderebisExcelidanResult.Success == false)
+            //aq unda fotoebi renamephotos
+            if (excelReadDTO.GadanomriliaFotoebi != true)
             {
-                return new Result<bool>
+                RenamePhotoDTO renamePhotoDTOForRename = new RenamePhotoDTO();
+                renamePhotoDTOForRename.FolderPath = excelReadDTO.FolderPath;
+                renamePhotoDTOForRename.PhotoStartNumber = excelReadDTO.PhotoStartNumber;
+                var RenamePhotosInFolderFromExcel = RenamePhotosInFolder(renamePhotoDTOForRename);
+                if (RenamePhotosInFolderFromExcel.Success == false)
                 {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = GadanomvraFolderebisExcelidanResult.Message
-                };
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = RenamePhotosInFolderFromExcel.Message
+                    };
+                }
             }
-               
+            //aq unda fotoebi renamephotos
 
             var ProcentisDatvlaResult = _windbreakMethods.QarsafariProcentisDatvla();
             if (ProcentisDatvlaResult.Success == false)
@@ -667,17 +686,17 @@ namespace GeographicDynamic_DAL.Repository
                 };
             }
 
-            //// გადაგვაქვს ინფორმაცია აქსესიდან ექსელში
-            //var UpdateFromAccessToExcellResult = _windbreakMethods.UpdateFromAccessToExcell();
-            //if (UpdateFromAccessToExcellResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UpdateFromAccessToExcellResult.Message
-            //    };
-            //}
+            // გადაგვაქვს ინფორმაცია აქსესიდან ექსელში
+            var UpdateFromAccessToExcellResult = _windbreakMethods.UpdateFromAccessToExcell();
+            if (UpdateFromAccessToExcellResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UpdateFromAccessToExcellResult.Message
+                };
+            }
 
             // შევსება ველების სადაც ვინახავთ რომელი მუნიციპალიტეტია და რომელი ეტაპია დათვლის 
             var FillProjectEtapiIDSResult = _windbreakMethods.FillProjectEtapiIDS(excelReadDTO.ProjectNameID, excelReadDTO.EtapiID);
@@ -885,7 +904,7 @@ namespace GeographicDynamic_DAL.Repository
                 string Sakutrebastore = "";// ინახება მნიშვნელობა როცა isUniqIdLiterIdtrue 
                 foreach (var item in qarsafaris)
                 {
-                    if (item.IsUniqLiterNull == "true" && item.Owner != null)
+                    if (item.IsUniqLiterNull == "true") // && item.Owner != null
                     {
                         if (item.Owner == "მუნიციპალიტეტი" || item.Owner == "სახელმწიფო" || String.IsNullOrEmpty(item.Owner))
                         {
@@ -899,7 +918,7 @@ namespace GeographicDynamic_DAL.Repository
                         }
                     }
 
-                    if (item.IsUniqLiterNull == "false" && item.Owner == null)
+                    if (item.IsUniqLiterNull == "false") // && item.Owner == null
                     {
                         item.Sakutreba = Sakutrebastore;
                     }

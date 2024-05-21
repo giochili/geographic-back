@@ -226,46 +226,6 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 throw;
             }
         }
-
-
-    //    public Result<bool> GadanomvraFolderebisExcelidan()
-    //    {
-
-    //        GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
-    //        List<Qarsafari> distinctUniqIds = geographicDynamicDbContext.Qarsafaris
-    //.Where(x => x.IsUniqLiterNull == "true")
-    //.OrderBy(x => x.UniqId)
-    ////.Select(x => new {UniqId = x.UniqId, LiterId = x.LiterId, UniqIdOld = x.UniqIdOld })
-    //.ToList();
-    //        var FolderPath = renamePhotoDTO.FolderPath;
-
-
-    //        try
-    //        {
-    //            return new Result<bool>
-    //            {
-    //                Success = true,
-    //                // Data = uniqIdsNotInAccessList,
-    //                StatusCode = System.Net.HttpStatusCode.OK,
-    //                Message = "წარმატებით დასრულდა შემოწმება Excel-ში UniqId-ის "
-    //            };
-
-    //        }
-    //        catch
-    //        {
-    //            return new Result<bool>
-    //            {
-    //                Success = false,
-    //                StatusCode = System.Net.HttpStatusCode.BadGateway,
-    //                Message = "წარუმატებლად დასრულდა შემოწმება Excel-ში UniqId-ის "
-
-    //            };
-    //        }
-
-    //    }
-
-
-
         ////აქ უნდა შემოწმდეს ლიტერი უნიკიდი  თუ მეორედება ექსელში მაშინ აღარ უდნა გააგრძელოს პროცესი 
         public Result<double?> ShemowmebaUnicLiterExcelshi()
         {
@@ -375,7 +335,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         Success = false,
                         //Data = uniqIdsNotInAccessList,
                         StatusCode = System.Net.HttpStatusCode.BadGateway,
-                        Message = "მოხდა შეცდომა ! Excel UniqId  !"
+                        Message = "მოხდა შეცდომა ! Excel UniqId  !: " + uniqIdsNotInAccessList
                     };
                 }
 
@@ -466,7 +426,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             }
         }
         // ფუნქცია გამოიყენება რომ შეავსოს ველები სადაც გვიწერია პროექტის(მუნიციპალიტეტის) დასახელება და ეტაპის ნუმერაცია 
-        public Result<string?> FillProjectEtapiIDS(int ProjectNameID,int EtapiID)
+        public Result<string?> FillProjectEtapiIDS(int ProjectNameID, int EtapiID)
         {
             try
             {
@@ -714,7 +674,12 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "აქსესის წაკითხვის მოხდა შეცდომა ! " + ex.Message
+                    };
                 }
                 // The connection is automatically closed becasuse of using block.    
             }
@@ -1216,6 +1181,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         qarsafariGrouped.LandGisOperator = qarsafariExcel.LandGisOperator;
                         qarsafariGrouped.Date = qarsafariExcel.Date;
                         qarsafariGrouped.GisOperator = qarsafariExcel.GisOperator;
+                        qarsafariGrouped.FieldOperator = qarsafariExcel.FieldOperator;
                         qarsafariGrouped.DaTe1 = qarsafariExcel.DaTe1;
                         qarsafariGrouped.OverlapCadCode = qarsafariExcel.OverlapCadCode;
                         qarsafariGrouped.Owner = qarsafariExcel.Owner;
