@@ -73,60 +73,81 @@ namespace GeographicDynamic_DAL.Repository
 
                         int photoLength = 0;
                         bool photoebiaremtxveva = false;
+                        string formattedDate;
+                        using (Image myImageFirst = Image.FromFile(files[0]))
+                        {
 
+                            try
+                            {
 
-                        Image myImageFirst = Image.FromFile(files[0]);
-                        PropertyItem propItemFirst = myImageFirst.GetPropertyItem(306);
-                        DateTime dtakenFirst;
-                        //// ახლა ვიღებთ data taken ს პირველი ფოტო სურათის რათა შევადაროთ დანარჩენებს
-                        string sdateFirst = Encoding.UTF8.GetString(propItemFirst.Value).Trim();
-                        string secondhalfFirst = sdateFirst.Substring(sdateFirst.IndexOf(" "), (sdateFirst.Length - sdateFirst.IndexOf(" ")));
-                        string firsthalfFirst = sdateFirst.Substring(0, 10);
-                        firsthalfFirst = firsthalfFirst.Replace(":", "-");
-                        sdateFirst = firsthalfFirst + secondhalfFirst;
-                        DateTime firstFileDate = DateTime.Parse(sdateFirst);
-                        string formattedDate = firstFileDate.ToString("MM/dd/yy");
+                                PropertyItem propItemFirst = myImageFirst.GetPropertyItem(306);
+                                DateTime dtakenFirst;
+                                //// ახლა ვიღებთ data taken ს პირველი ფოტო სურათის რათა შევადაროთ დანარჩენებს
+                                string sdateFirst = Encoding.UTF8.GetString(propItemFirst.Value).Trim();
+                                string secondhalfFirst = sdateFirst.Substring(sdateFirst.IndexOf(" "), (sdateFirst.Length - sdateFirst.IndexOf(" ")));
+                                string firsthalfFirst = sdateFirst.Substring(0, 10);
+                                firsthalfFirst = firsthalfFirst.Replace(":", "-");
+                                sdateFirst = firsthalfFirst + secondhalfFirst;
+                                DateTime firstFileDate = DateTime.Parse(sdateFirst);
+                                formattedDate = firstFileDate.ToString("MM/dd/yy");
+                            }
+                            catch (ArgumentException)
+                            {
+                                // Date Taken property not found, fallback to modified date
+                                FileInfo fileInfo = new FileInfo(files[0]);
+                                formattedDate = fileInfo.LastWriteTime.ToString("MM/dd/yy");
+                            }
+
+                        }
 
                         foreach (var file in files)
                         {
-                            Image myImage = Image.FromFile(@file);
-                            PropertyItem propItem = myImage.GetPropertyItem(306);
-                            DateTime dtaken;
-
-                            //Convert date taken metadata to a DateTime object
-                            string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
-                            string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
-                            string firsthalf = sdate.Substring(0, 10);
-                            firsthalf = firsthalf.Replace(":", "-");
-                            sdate = firsthalf + secondhalf;
-                            dtaken = DateTime.Parse(sdate);
-                            //DateTime firstFileDate = File.GetCreationTime(files[0]); // შექმნის თარიღი (გადაკოპირების)    
-                            //აქ ვიღებდით modify date-ს 
-                            //DateTime firstFileDate = File.GetLastWriteTime(files[0]); // მოდიფიკაციის თარიღი( გადაღების) 
-                            //string formattedDate = firstFileDate.ToString("MM/dd/yy");
-
-
-                            photoLength++;
-                            var extensionTest = Path.GetExtension(file);
-
-                            //DateTime fileDate = File.GetCreationTime(file);
-                            //DateTime fileDate = File.GetLastWriteTime(file);
-
-
-
-                            // string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
-                            string formattedDateToCompare = dtaken.ToString("MM/dd/yy");
-
-                            if (formattedDateToCompare != formattedDate && !photoebiaremtxveva)
+                            using (Image myImage = Image.FromFile(file))
                             {
-                                UnMachedPhotos.Add(numericalPathLitter + " | " + "/" + numericalPath.ToString() + "/" + " |თარიღები არ ემთხვევა");
-                                photoebiaremtxveva = true;
-                                // MessageBox.Show("მოხდა შეცდომა ფაილების თარიღები არ ემთხვევა ერთმანეთს !");
+                                DateTime dtaken;
+
+                                try
+                                {
+
+                                    PropertyItem propItem = myImage.GetPropertyItem(306);
+                                    //Convert date taken metadata to a DateTime object
+                                    string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
+                                    string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
+                                    string firsthalf = sdate.Substring(0, 10);
+                                    firsthalf = firsthalf.Replace(":", "-");
+                                    sdate = firsthalf + secondhalf;
+                                    dtaken = DateTime.Parse(sdate);
+                                }
+                                catch (ArgumentException)
+                                {
+                                    // Date Taken property not found, fallback to modified date
+                                    FileInfo fileInfo = new FileInfo(file);
+                                    dtaken = fileInfo.LastWriteTime;
+                                }
+
+
+                                photoLength++;
+                                var extensionTest = Path.GetExtension(file);
+
+                                //DateTime fileDate = File.GetCreationTime(file);
+                                //DateTime fileDate = File.GetLastWriteTime(file);
+
+
+
+                                // string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
+                                string formattedDateToCompare = dtaken.ToString("MM/dd/yy");
+
+                                if (formattedDateToCompare != formattedDate && !photoebiaremtxveva)
+                                {
+                                    UnMachedPhotos.Add(numericalPathLitter + " | " + "/" + numericalPath.ToString() + "/" + " |თარიღები არ ემთხვევა");
+                                    photoebiaremtxveva = true;
+                                    // MessageBox.Show("მოხდა შეცდომა ფაილების თარიღები არ ემთხვევა ერთმანეთს !");
+                                }
+
+
+                                //}
+
                             }
-
-
-                            //}
-
                         }
                         if (photoLength < 3)
                         {
