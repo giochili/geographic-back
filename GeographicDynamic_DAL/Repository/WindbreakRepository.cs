@@ -104,7 +104,7 @@ namespace GeographicDynamic_DAL.Repository
                             //აქ ვიღებდით modify date-ს 
                             //DateTime firstFileDate = File.GetLastWriteTime(files[0]); // მოდიფიკაციის თარიღი( გადაღების) 
                             //string formattedDate = firstFileDate.ToString("MM/dd/yy");
-                            
+
 
                             photoLength++;
                             var extensionTest = Path.GetExtension(file);
@@ -114,7 +114,7 @@ namespace GeographicDynamic_DAL.Repository
 
 
 
-                           // string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
+                            // string formattedDateToCompare = fileDate.ToString("MM/dd/yy");
                             string formattedDateToCompare = dtaken.ToString("MM/dd/yy");
 
                             if (formattedDateToCompare != formattedDate && !photoebiaremtxveva)
@@ -494,19 +494,40 @@ namespace GeographicDynamic_DAL.Repository
                                 bool isWritten = false;
                                 if (!isWritten)
                                 {
-                                    //var modifiedDate1 = f6.LastWriteTime;
-                                    //ვიღებთ ფოტოს data taken-ს modify თარიღის ნაცვლად
-                                    Image myImage = Image.FromFile(@newPhotoNamePath);
-                                    PropertyItem propItem = myImage.GetPropertyItem(306);
+                                    DateTime photoDate;
                                     DateTime dtaken;
+                                    try
+                                    {
+                                        // Try to get the Date Taken property
+                                        using (Image myImage = Image.FromFile(@newPhotoNamePath))
+                                        {
+                                            PropertyItem propItem = myImage.GetPropertyItem(306);
+                                            string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
+                                            string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
+                                            string firsthalf = sdate.Substring(0, 10);
+                                            firsthalf = firsthalf.Replace(":", "-");
+                                            sdate = firsthalf + secondhalf;
+                                            dtaken = DateTime.Parse(sdate, CultureInfo.InvariantCulture);
+                                        }
+                                    }
+                                    catch (ArgumentException)
+                                    {
+                                        // Date Taken property not found, fallback to modified date
+                                        dtaken = f6.LastWriteTime;
+                                    }
+                                    ////var modifiedDate1 = f6.LastWriteTime;
+                                    ////ვიღებთ ფოტოს data taken-ს modify თარიღის ნაცვლად
+                                    //Image myImage = Image.FromFile(@newPhotoNamePath);
+                                    //PropertyItem propItem = myImage.GetPropertyItem(306);
+                                    //DateTime dtaken;
 
-                                    //Convert date taken metadata to a DateTime object
-                                    string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
-                                    string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
-                                    string firsthalf = sdate.Substring(0, 10);
-                                    firsthalf = firsthalf.Replace(":", "-");
-                                    sdate = firsthalf + secondhalf;
-                                    dtaken = DateTime.Parse(sdate);
+                                    ////Convert date taken metadata to a DateTime object
+                                    //string sdate = Encoding.UTF8.GetString(propItem.Value).Trim();
+                                    //string secondhalf = sdate.Substring(sdate.IndexOf(" "), (sdate.Length - sdate.IndexOf(" ")));
+                                    //string firsthalf = sdate.Substring(0, 10);
+                                    //firsthalf = firsthalf.Replace(":", "-");
+                                    //sdate = firsthalf + secondhalf;
+                                    //dtaken = DateTime.Parse(sdate);
 
                                     var formatInfo = new CultureInfo("en-US").DateTimeFormat;
                                     formatInfo.DateSeparator = "-";
