@@ -1,17 +1,20 @@
 ﻿using GeographicDynamic_DAL.DTOs.Windbreak;
 using GeographicDynamicWebAPI.Wrappers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Office.Interop.Excel;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.OleDb;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace GeographicDynamic_DAL.Models.WindbreakMethods
 {
@@ -62,6 +65,8 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             }
 
         }
+
+        ///////აქ იკითხება ძირი ექსელი და შედის sql ბაზაში 
         public Result<bool> ExcelisWakitxva(ExcelReadDTO excelReadDTO)
         {
             GeographicDynamicDbContext GeographicDynamicDbContext = new GeographicDynamicDbContext();
@@ -116,6 +121,12 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
                     foreach (var columnName in GeographicDynamicDbContext.ColumnNames)
                     {
+                        /////////ამ იფ სთეითმენთით ვახტებით WoodyPlantQuantity სვეტს რადგან არ წავიკითხოთ შემდეგ მეთოდში რომ შეივსოს და არ გადაიწეროს 
+
+                        //if (columnName.Sqlname == "WoodyPlantQuantity")
+                        //{
+                        //    continue;
+                        //}
                         //Get cell type
                         if (columnName.ColN != null)
                         {
@@ -226,7 +237,49 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 throw;
             }
         }
+
+        ///////////////////// მეთოდი კრიბავს ხეხილს კარგმდგომარეობაში გაჩეხილი და გამხმარი და შედეგი იწერება მცენარეების რაოდენობის ველში 
+        public Result<bool> fillAmountOfSpeces()
+        {
+
+            GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
+            try
+            {
+
+
+                foreach (var item in geographicDynamicDbContext.Qarsafaris.ToList())
+                {
+
+                    var InGoodCondition = (item.InGoodCondition != null ? item.InGoodCondition : 0);
+                    var Rampike = (item.Rampike != null ? item.Rampike : 0);
+                    var ChoppedDown = (item.ChoppedDown != null ? item.ChoppedDown : 0);
+                    item.WoodyPlantQuantity = InGoodCondition + Rampike + ChoppedDown;
+                }
+                geographicDynamicDbContext.SaveChanges();
+                return new Result<bool>
+                {
+                    Success = true,
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Message = "წარმატებით დასრულდა ხეხილის რაოდენობების ჩაწერა "
+                };
+
+            }
+            catch
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "წარუმატებლად დასრულდა ხეხილის რაოდენობების ჩაწერა  "
+
+                };
+            }
+        }
+
+
         ////აქ უნდა შემოწმდეს ლიტერი უნიკიდი  თუ მეორედება ექსელში მაშინ აღარ უდნა გააგრძელოს პროცესი 
+        /// 
+
         public Result<double?> ShemowmebaUnicLiterExcelshi()
         {
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
@@ -257,11 +310,16 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             }
         }
         //// ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს 
+
+
+
+        #region მოწმდება MDB Excel და fotoebi და გამოქავს შედეგი თუ სადმე ცხრილებს შორის დუბლიკატია ანდა რამე ზედმეტი ან ნაკლებია
         public Result<string?> ShemowmebaAccessExcelUnicLiterDublicats()
         {
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
 
             string uniqIdsNotInAccessList = "";
+            List<string> uniqIdsNotInAccessListActual = new List<string>();
             try
             {
 
@@ -343,7 +401,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
                 var duplicatesMDB = qarsafaris.GroupBy(q => new { q.UniqId, q.LiterId }).Where(g => g.Count() > 1).SelectMany(g => g);
 
-                if (duplicates.Any())
+                if (!duplicates.Any())
                 {
 
                     //Console.WriteLine("Duplicates found:");
@@ -362,25 +420,30 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
 
                     List<Qarsafari> resultList = qarsafaris.Where(u => windbreakMdbs.Any(l => l.LiterId == u.LiterId && l.UniqId == u.UniqId)).ToList();
-                    //foreach (var excel in qarsafaris)
-                    //{
-                    //    bool existsInList = windbreakMdbs.Any(x => x.UniqId == excel.UniqId && x.LiterId == excel.LiterId);
-                    //    if (!existsInList)
-                    //    {
-                    //        uniqIdsNotInAccessList.Add(string.Concat(excel.UniqId, "-", excel.LiterId, "excel"));
-                    //    }
-                    //}
-                    //foreach (var access in windbreakMdbs)
-                    //{
-                    //    bool existsInList = qarsafaris.Any(x => x.UniqId == access.UniqId && x.LiterId == access.LiterId);
-                    //    if (!existsInList)
-                    //    {
-                    //        uniqIdsNotInAccessList.Add(string.Concat(access.UniqId, "-", access.LiterId, "access"));
-                    //    }
-                    //}sultList = qarsafaris.Where(u => windbreakMdbs.Any(l => l.LiterId == u.LiterId && l.UniqId == u.UniqId)).ToList();
+
+                    /////////ესენი დაკომენტარებული იო და ახლა გასატესტია
+                    foreach (var excel in qarsafaris)
+                    {
+                        bool existsInList = windbreakMdbs.Any(x => x.UniqId == excel.UniqId && x.LiterId == excel.LiterId);
+                        if (!existsInList)
+                        {
+                            uniqIdsNotInAccessListActual.Add(string.Concat(excel.UniqId, "-", excel.LiterId, "excel"));
+                            //uniqIdsNotInAccessListActual.Add(string.Concat(excel.UniqId.ToString(), "-", excel.LiterId.ToString(), "excel"));
+
+                        }
+                    }
+                    foreach (var access in windbreakMdbs)
+                    {
+                        bool existsInList = qarsafaris.Any(x => x.UniqId == access.UniqId && x.LiterId == access.LiterId);
+                        if (!existsInList)
+                        {
+                            uniqIdsNotInAccessListActual.Add(string.Concat(access.UniqId, "-", access.LiterId, "access"));
+                        }
+                    }
+                    resultList = qarsafaris.Where(u => windbreakMdbs.Any(l => l.LiterId == u.LiterId && l.UniqId == u.UniqId)).ToList();
 
 
-                    if (resultList.Count != 0)
+                    if (uniqIdsNotInAccessListActual.Count != 0)
                     {
                         string? concatenatedString = "";
                         foreach (var item in resultList)
@@ -391,7 +454,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         return new Result<string?>
                         {
                             Success = false,
-                            // Data = concatenatedString,
+                            Data = uniqIdsNotInAccessListActual.ToList(),
                             StatusCode = System.Net.HttpStatusCode.BadGateway,
                             Message = "მოხდა შეცდომა ! Excel და Access რაოდენობა არ ემთხვევა!"
                         };
@@ -425,6 +488,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+        #endregion
         // ფუნქცია გამოიყენება რომ შეავსოს ველები სადაც გვიწერია პროექტის(მუნიციპალიტეტის) დასახელება და ეტაპის ნუმერაცია 
         public Result<string?> FillProjectEtapiIDS(int ProjectNameID, int EtapiID)
         {
@@ -457,8 +521,9 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             }
         }
 
-        //ეს ფუნქცია მიდის და ქარსაფარის ცხრილში სახეობების მიხედვით აკეთებს ვარჯის ფართების ჩაწერას
 
+
+        //ეს ფუნქცია მიდის და ქარსაფარის ცხრილში სახეობების მიხედვით აკეთებს ვარჯის ფართების ჩაწერას
         public Result<bool> ChaweraVarjisParti(int ProjectNameID)
         {
             try
@@ -491,6 +556,8 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+
+
         //ვარჯის ფართების შემოწმება სადაც ხეხილი წერია და ვარჯის ფართი არა 
         public Result<bool> CheckerOfVarjisFartiandSaxeoba()
         {
@@ -524,6 +591,8 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+
+
         // ეშვება მეთოდი იმისთვის რომ LITER_ID და UNIQ-ID შეერთდეს და ჩაიწეროს UID-ში
         public Result<bool> UIDReplaceExcel()
         {
@@ -549,6 +618,9 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+
+
+
         // ფუნქცია გამოიყენება რომ წაიკითხოს Access ფაილი და შეყაროს SQL ბაზაში 
         public Result<bool> AccessWakitxva(string AccessFilePath, string AccessShitName)
         {
@@ -558,7 +630,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
             GeographicDynamicDbContext.WindbreakMdbs.ExecuteDelete();
 
-            #region
+            #region  OleDbConnection for Access
 
             //OleDbConnection
 
@@ -610,12 +682,17 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                                         PropertyInfo propertyInfo = typeof(WindbreakMdb).GetProperty(columnName.Sqlname);
                                         if (propertyInfo != null)
                                         {
-                                            ;
+
                                             // Handle conversion based on cell type
                                             if (cellType == typeof(System.Single))
                                             {
                                                 Double? doubleValue = Convert.ToDouble(cellValue);
                                                 propertyInfo.SetValue(windbreakMdb, doubleValue);
+                                            }
+                                            else if (cellType == typeof(System.Int32))
+                                            {
+                                                Double? intValue = Convert.ToDouble(cellValue);
+                                                propertyInfo.SetValue(windbreakMdb, intValue);
                                             }
                                             else if (cellType == typeof(string))
                                             {
@@ -690,6 +767,9 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 StatusCode = System.Net.HttpStatusCode.OK
             };
         }
+
+
+
         //ამ ფუნქციაზი ხდება შემოწმება UniqID - ების ექსელში და აქსესში 
         // ფუნქცია გამოიყენება რომ მოხდეს Access ფაილიდან წაკითხული მონაცემები და გადასული ინფორმაციის UID ველის შევსება ლიტერის და უნიკაიდის კონკატენაციით 
         public Result<bool> UIDReplaceAccess()
@@ -724,6 +804,9 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+
+
+
         // ფუნქცია გამოიყენება რომ დაგაიწეროს Access ფაილიდან საჭირო მონაცემები Excel-ში 
         public Result<bool> UpdateFromAccessToExcell()
         {
@@ -799,16 +882,21 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
 
         }
+
         // ითვლება პროცენტული მაჩვენებელი ხეხილის თუ რამდენია კარგ მდგომარეობაში და ასე შემდეგ 
         public Result<bool> QarsafariProcentisDatvla()
+
         {
+
             try
+
             {
                 GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
 
                 List<Qarsafari> ExcelList = geographicDynamicDbContext.Qarsafaris.ToList();
 
                 foreach (var Excel in ExcelList)
+
                 {
                     Excel.ChoppedDownQuantity = Excel.ChoppedDown;
                     if (Excel.ChoppedDown != 0 && Excel.ChoppedDown != null)
@@ -826,16 +914,20 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     }
 
                     geographicDynamicDbContext.SaveChanges();
+
                 }
 
                 return new Result<bool>
+
                 {
                     Success = true,
                     StatusCode = System.Net.HttpStatusCode.OK,
                     Message = "წარმატებით დასრულდა გადაწერა ქარსაფარში პროცენტის დათვლა "
                 };
             }
+
             catch (Exception ex)
+
             {
                 return new Result<bool>
                 {
@@ -925,7 +1017,9 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
         }
         // აქ გვჭირდება შემმოწმება ფუნქციის ჩაწერა რომელიც გადაამოწმებს თუ სადმე ხეხილი მეორდება უბანზე 
         public Result<bool> QarsafariXexilisShemowmeba()
+
         {
+
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
 
             try
@@ -1250,42 +1344,237 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+        #region WindbreakMDB SQL-ში ჩაწერა QarsafariGroupded-ან
         //ფუნქცია იმისთვის რომ Access ფაილში ჩაიწეროს QarsafariGroupded-ან 
-        public Result<bool> UPDTFromExcelToAccess(string AccessShitName)
+        /// ////// ეს ფუქნცია უბრალოდ SQL tablshi ყრის ქარსაფარიდან და მერე ვეღარ ვიყენებთ ჯერჯერობით ვაკომენტარებ სამომავლოდ შეიძლება რამეში გამოვიყენოთ 
+        //ეს არ წერს Mdb ში არაფერს !!!!!!!!!!!!!!!!
+        //public Result<bool> UPDTFromExcelToAccess(string AccessShitName)
+        //{
+        //    try
+        //    {
+
+        //        var GeographicDynamicDbContext = new GeographicDynamicDbContext();
+
+        //        List<WindbreakMdb> windbreakMdbs = GeographicDynamicDbContext.WindbreakMdbs.ToList();
+        //        List<QarsafariGrouped> qarsafariGroupeds = GeographicDynamicDbContext.QarsafariGroupeds.ToList();
+
+        //        if (!string.IsNullOrEmpty(AccessShitName))
+        //        {
+        //            foreach (var item in windbreakMdbs)
+        //            {
+        //                //WindbreakMdb access = GeographicDynamicDbContext.WindbreakMdbs.FirstOrDefault(x => x.LiterId == excel.LiterId && x.UniqId == excel.UniqId);
+        //                QarsafariGrouped ExcelGrouped = GeographicDynamicDbContext.QarsafariGroupeds.FirstOrDefault(x => x.Uid == item.Uid);
+        //                if (ExcelGrouped != null)
+        //                {
+        //                    item.PhotoN = ExcelGrouped.PhotoN;
+        //                    item.Shrubbery = Convert.ToDouble(ExcelGrouped.Shrubbery);
+        //                    item.WoodyPlantPercent = Convert.ToString(ExcelGrouped.WoodyPlantPercent);
+        //                    item.WoodyPlantQuantity = Convert.ToDouble(ExcelGrouped.WoodyPlantQuantity);
+        //                    item.WoodyPlantSpecies = ExcelGrouped.WoodyPlantSpecies;
+        //                    item.InGoodCondition = Convert.ToDouble(ExcelGrouped.InGoodCondition);
+        //                    item.ChoppedDown = Convert.ToDouble(ExcelGrouped.ChoppedDown);
+        //                    item.Rampike = Convert.ToDouble(ExcelGrouped.Rampike);
+        //                    item.SpeciesMediumAge = Convert.ToDouble(ExcelGrouped.SpeciesMediumAge);
+        //                    item.Company = ExcelGrouped.Company;
+        //                    item.FieldOperator = ExcelGrouped.FieldOperator;
+        //                    item.UniqId = (float?)ExcelGrouped.UniqId;
+
+        //                    GeographicDynamicDbContext.SaveChanges();
+
+        //                }
+        //            }
+        //        }
+
+
+        //        return new Result<bool>
+        //        {
+        //            Success = true,
+        //            StatusCode = System.Net.HttpStatusCode.OK
+        //        };
+
+        //    }
+
+        //    catch (Exception ex)
+        //    {
+
+        //        return new Result<bool>
+        //        {
+        //            Success = false,
+        //            StatusCode = System.Net.HttpStatusCode.BadGateway,
+        //            Message = "მოხდა შეცდომა Excel-ცხრილიდან Access-ცხრილში გადაწერის დროს" + ex.Message
+        //        };
+        //    }
+        //}
+        #endregion
+
+
+
+        //////////// ფუნქცია კითხულობს SQL-ბაზას კონკრეტულად qarsafariGroupeds-ს და წერს დათვლილ საჭირო მონაცემებს თვითონ access ფაილში 
+        #region ChatGPT + gios-ს ნახლაფორთალი რომელიც იღებს qarsafariGroupds და საჭირო ველები რომლებიც გვჭირდება access ფაილში იწერება იქ ჯერ სორტირდება და შემდეგ იყრება 
+        #region მონახაზი მარა მაინც იყოს რა იცი რაში დაგჭირდეს კაცს Access ფაილში მონაცემების ჩაწერის
+        //public Result<bool> UpdateFromQarsafariGroupedToAccessFile(string AccessShitName, string AccessFilePath)
+        //{
+        //    try
+        //    {
+
+        //        var GeographicDynamicDbContext = new GeographicDynamicDbContext();
+        //        var uniqid = GeographicDynamicDbContext.ColumnNames.FirstOrDefault(m => m.Sqlname == "UniqId").AccessName;
+        //        var literid = GeographicDynamicDbContext.ColumnNames.FirstOrDefault(m => m.Sqlname == "LiterId").AccessName;
+        //        //var filterAccess = columnNameDTO.AccessName;
+        //        var AccessFileAddress = AccessFilePath;
+
+        //        // Sort qarsafariGroupeds by UniqId
+        //        List<QarsafariGrouped> qarsafariGroupeds = GeographicDynamicDbContext.QarsafariGroupeds
+        //            .OrderBy(x => x.UniqId)
+        //            .ToList();
+
+        //        #region  OleDbConnection for Access
+
+        //        //OleDbConnection
+
+        //        //string connectionString = @"Provider=Microsoft.ACE.OLEDB.16.0;Data Source=C:\Users\gioch\OneDrive\Desktop\GEOGraphics\test.accdb";
+        //        //string connectionString = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\Users\\gioch\\OneDrive\\Desktop\\GEOGraphics\Dedoplistskaro.mdb";
+        //        string connectionString = "";
+        //        if (Path.GetExtension(AccessFileAddress).ToLower().Trim() == ".mdb" && Environment.Is64BitOperatingSystem == false)
+        //        {
+        //            connectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + AccessFileAddress;
+        //            connectionString = "Provider=Microsoft.Jet.OLEDBMicrosoft.Jet.OLEDB.4.0;Data Source=" + AccessFileAddress + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
+        //        }
+        //        else
+        //        {
+        //            connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + AccessFileAddress;
+        //        }
+
+        //        #endregion
+
+        //        using (OleDbConnection connection = new OleDbConnection(connectionString))
+        //        {
+        //            connection.Open();
+
+        //            // Construct the update command
+        //            string updateCommand = $"UPDATE [{AccessShitName}] SET PhotoN = @Photo_N WHERE {uniqid} = @UNIQ_ID AND {literid} = @Liter_ID";
+        //            OleDbCommand command = new OleDbCommand(updateCommand, connection);
+
+        //            // Iterate through qarsafariGroupeds and update Access file
+        //            foreach (var item in qarsafariGroupeds)
+        //            {
+        //                command.Parameters.Clear();
+        //                command.Parameters.AddWithValue("@Photo_N", item.PhotoN);
+        //                command.Parameters.AddWithValue("@UNIQ_ID", item.UniqId);
+        //                command.Parameters.AddWithValue("@Liter_ID", item.LiterId);
+
+        //                command.ExecuteNonQuery();
+        //            }
+
+        //            connection.Close();
+        //        }
+
+
+        //        return new Result<bool>
+        //        {
+        //            Success = true,
+        //            StatusCode = System.Net.HttpStatusCode.OK
+        //        };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new Result<bool>
+        //        {
+        //            Success = false,
+        //            StatusCode = System.Net.HttpStatusCode.BadGateway,
+        //            Message = "An error occurred while updating the Access table from the Excel data: " + ex.Message
+        //        };
+        //    }
+        //}
+        #endregion
+
+
+        ///////// ეს ფუნქცია ამატებს access ფალში გადანომრილ ინფორმაციას 
+        public Result<bool> UpdateFromQarsafariGroupedToAccessFile(string AccessSheetName, string AccessFilePath)
         {
             try
             {
-
                 var GeographicDynamicDbContext = new GeographicDynamicDbContext();
+                var uniqid = GeographicDynamicDbContext.ColumnNames.FirstOrDefault(m => m.Sqlname == "UniqId").AccessName;
+                var literid = GeographicDynamicDbContext.ColumnNames.FirstOrDefault(m => m.Sqlname == "LiterId").AccessName;
 
-                List<WindbreakMdb> windbreakMdbs = GeographicDynamicDbContext.WindbreakMdbs.ToList();
-                List<QarsafariGrouped> qarsafariGroupeds = GeographicDynamicDbContext.QarsafariGroupeds.ToList();
+                //// Sort qarsafariGroupeds by UniqId and LiterId
+                //List<QarsafariGrouped> qarsafariGroupeds = GeographicDynamicDbContext.QarsafariGroupeds
+                //    .OrderBy(x => x.UniqId)
+                //    //.ThenBy(x => x.LiterId)
+                //    .ToList();
 
-                if (!string.IsNullOrEmpty(AccessShitName))
+                // Connection string for Access
+                string connectionString = "";
+                if (Path.GetExtension(AccessFilePath).ToLower().Trim() == ".mdb" && !Environment.Is64BitOperatingSystem)
                 {
-                    foreach (var item in windbreakMdbs)
+                    connectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + AccessFilePath;
+                }
+                else
+                {
+                    connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + AccessFilePath;
+                }
+
+                using (OleDbConnection connection = new OleDbConnection(connectionString))
+                {
+                    connection.Open();
+
+
+
+                    // Add new column if it does not exist
+                    string newColumnName = "Uniq_ID_NEW_Gadanomrili";
+                    try
                     {
-                        //WindbreakMdb access = GeographicDynamicDbContext.WindbreakMdbs.FirstOrDefault(x => x.LiterId == excel.LiterId && x.UniqId == excel.UniqId);
-                        QarsafariGrouped ExcelGrouped = GeographicDynamicDbContext.QarsafariGroupeds.FirstOrDefault(x => x.Uid == item.Uid);
-                        if (ExcelGrouped != null)
+                        string alterTableQuery = $"ALTER TABLE [{AccessSheetName}] ADD COLUMN {newColumnName} DOUBLE";
+                        OleDbCommand alterCmd = new OleDbCommand(alterTableQuery, connection);
+                        alterCmd.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (!ex.Message.Contains("duplicate") && !ex.Message.Contains("already exists"))
                         {
-                            item.PhotoN = ExcelGrouped.PhotoN;
-                            item.Shrubbery = Convert.ToDouble(ExcelGrouped.Shrubbery);
-                            item.WoodyPlantPercent = Convert.ToString(ExcelGrouped.WoodyPlantPercent);
-                            item.WoodyPlantQuantity = Convert.ToDouble(ExcelGrouped.WoodyPlantQuantity);
-                            item.WoodyPlantSpecies = ExcelGrouped.WoodyPlantSpecies;
-                            item.InGoodCondition = Convert.ToDouble(ExcelGrouped.InGoodCondition);
-                            item.ChoppedDown = Convert.ToDouble(ExcelGrouped.ChoppedDown);
-                            item.Rampike = Convert.ToDouble(ExcelGrouped.Rampike);
-                            item.SpeciesMediumAge = Convert.ToDouble(ExcelGrouped.SpeciesMediumAge);
-                            item.Company = ExcelGrouped.Company;
-                            item.FieldOperator = ExcelGrouped.FieldOperator;
-                            item.UniqId = (float?)ExcelGrouped.UniqId;
-
-                            GeographicDynamicDbContext.SaveChanges();
-
+                            throw;
                         }
                     }
+
+
+                    // Sort Access table by UniqId and LiterId
+                    //string sortCommand = $"SELECT * FROM [{AccessSheetName}] ORDER BY {uniqid}, {literid}";
+                    string query = $"SELECT * FROM [{AccessSheetName}]";
+                    OleDbCommand sortCmd = new OleDbCommand(query, connection);
+                    System.Data.OleDb.OleDbDataAdapter adapter = new System.Data.OleDb.OleDbDataAdapter(sortCmd);
+                    System.Data.DataTable dataTable = new System.Data.DataTable();
+                    adapter.Fill(dataTable);
+
+                    // Update PhotoN values in Access table
+                    foreach (var item in GeographicDynamicDbContext.QarsafariGroupeds)
+                    {
+                        // Find corresponding row in Access table
+                        System.Data.DataRow[] rows = dataTable.Select($"{uniqid} = '{item.UniqIdOld}' AND {literid} = '{item.LiterId}'");
+                        if (rows.Length > 0)
+                        {
+                            rows[0]["Photo_N"] = item.PhotoN;
+                            rows[0]["shrubbery"] = item.Shrubbery;
+                            rows[0]["Woody_plant_percent"] = item.WoodyPlantPercent;
+                            rows[0]["Woody_plant_quantity"] = item.WoodyPlantQuantity;
+                            rows[0]["woody_plant_species"] = item.WoodyPlantSpecies;
+                            rows[0]["In_good_condition"] = item.InGoodCondition;
+                            rows[0]["chopped_down"] = item.ChoppedDown;
+                            rows[0]["rampike"] = item.Rampike;
+                            rows[0]["species_medium_age"] = item.SpeciesMediumAge;
+                            rows[0]["Company"] = item.Company;
+                            rows[0]["Field_Operator"] = item.FieldOperator;
+                            rows[0]["Date_"] = item.Date;
+                            rows[0][newColumnName] = item.UniqId;
+                        }
+                    }
+
+                    // Update Access table with modified DataTable
+                    System.Data.OleDb.OleDbCommandBuilder builder = new System.Data.OleDb.OleDbCommandBuilder(adapter);
+                    adapter.UpdateCommand = builder.GetUpdateCommand();
+                    adapter.Update(dataTable);
+
+                    connection.Close();
                 }
 
 
@@ -1294,20 +1583,27 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     Success = true,
                     StatusCode = System.Net.HttpStatusCode.OK
                 };
-
             }
-
             catch (Exception ex)
             {
 
                 return new Result<bool>
                 {
                     Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = "მოხდა შეცდომა Excel-ცხრილიდან Access-ცხრილში გადაწერის დროს" + ex.Message
+                    StatusCode = System.Net.HttpStatusCode.InternalServerError,
+                    Message = "An error occurred while updating the Access table: " + ex.Message
                 };
             }
         }
+
+
+
+        #endregion
+
+
+
+
+
         // ფუნქცია ყრის მონაცემებს gadanomriliFotoebi-დან qarsafariGroupded-ში 
         public Result<bool> GadanomriliFotoebiToQarsafariGrouped()
         {
@@ -1576,7 +1872,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 ExcelWorkSheet.Cells[1, "O"] = "In_good_condition";
                 ExcelWorkSheet.Cells[1, "P"] = "chopped_down";
                 ExcelWorkSheet.Cells[1, "Q"] = "rampike";
-                ExcelWorkSheet.Cells[1, "R"] = "species_medium_age"; 
+                ExcelWorkSheet.Cells[1, "R"] = "species_medium_age";
                 ExcelWorkSheet.Cells[1, "S"] = "Note_";
                 ExcelWorkSheet.Cells[1, "T"] = "Company";
                 ExcelWorkSheet.Cells[1, "U"] = "Field_Operator";
@@ -1687,6 +1983,269 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             }
 
         }
+
+
+
+        //ფუნქცია კითხულობს ბაზას და ქმნის ახალ ექსელის ფაილს რომ ჩაიწეროს მონაცემები მხოლოდ დაგრუპულისთვის 
+        public Result<bool> WriteToExcelRootOne(List<Qarsafari> newQarsafari, string ExcelDestinationPath)
+        {
+
+            GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext(); //უკავშირდება კონტექსტს რომ გაიგოს ცხრილები SQL-დან 
+
+            Microsoft.Office.Interop.Excel.Application ExcelApp = new Microsoft.Office.Interop.Excel.Application(); //იქმნება აპლიკაცია წინასწარ 
+            Workbook ExcelWorkBook = null; // წინასწარ იქმნება ვორკბუკის ცვლადი რომ შემდეგში გამოვიყენოთ 
+            Worksheet ExcelWorkSheet = null; // ასევე წინასწარ იქმნება შიტის ცვლადი რომ გამოვიყენოთ შემდეგ 
+            ExcelApp.Visible = false; // აქ ვანიჭებთ ექსელის ფანჯარას რომ გამოჩნდეს პროგრამის მსვლელობა 
+            ExcelWorkBook = ExcelApp.Workbooks.Add(XlWBATemplate.xlWBATWorksheet);  // იქმნება ახალი ექსელის workbook რომელშიც გვაქ ერთი შიტი და ამ შიტს ვიყენებთ სამომავლოდ 
+
+            try
+            {
+                ExcelWorkSheet = ExcelWorkBook.Worksheets[1]; // აქ ვირჩევთ სამუშაო შიტს ვორკბუკიდან(ექსელიდან) ჩვენ შემთხვევაში ერთია და მაგიტომ გვაქ Worksheets[1} ინდექსად 1 
+
+
+                // ამ კოდის ფრაგმენტებში ივსება სათაურის ველები სხვა სიტყვებით რომ ვთქვათ პირველ row-ში იწერება მნიშვნელობები რამდენი სვეტიც გვაქ (column) 
+                ExcelWorkSheet.Cells[1, "A"] = "UNIQ_ID";
+                ExcelWorkSheet.Cells[1, "B"] = "Liter_ID";
+                ExcelWorkSheet.Cells[1, "C"] = "Photo_N";
+                //ExcelWorkSheet.Cells[1, "C"].EntireColumn.NumberFormat = "@";//ფორმატტდება დეითის ველის ტიპი ტექსტად
+                ExcelWorkSheet.Cells[1, "D"] = "REGION";
+                ExcelWorkSheet.Cells[1, "E"] = "Municipality";
+                ExcelWorkSheet.Cells[1, "F"] = "Adm_Mun";
+                ExcelWorkSheet.Cells[1, "G"] = "City_Town_Village";
+                ExcelWorkSheet.Cells[1, "H"] = "Land_Area_Sq_m";
+                ExcelWorkSheet.Cells[1, "I"] = "Land_Area_Ha";
+                ExcelWorkSheet.Cells[1, "J"] = "shrubbery";
+                ExcelWorkSheet.Cells[1, "K"] = "Woody_plant_percent";
+                ExcelWorkSheet.Cells[1, "L"] = "Woody_plant_quantity";
+                ExcelWorkSheet.Cells[1, "M"] = "VarjisFarti";
+                ExcelWorkSheet.Cells[1, "N"] = "woody_plant_species";
+                ExcelWorkSheet.Cells[1, "O"] = "In_good_condition";
+                ExcelWorkSheet.Cells[1, "P"] = "chopped_down";
+                ExcelWorkSheet.Cells[1, "Q"] = "rampike";
+                ExcelWorkSheet.Cells[1, "R"] = "species_medium_age";
+                ExcelWorkSheet.Cells[1, "S"] = "Note_";
+                ExcelWorkSheet.Cells[1, "T"] = "Company";
+                ExcelWorkSheet.Cells[1, "U"] = "Field_Operator";
+                ExcelWorkSheet.Cells[1, "V"] = "Date_";
+                ExcelWorkSheet.Cells[1, "V"].EntireColumn.NumberFormat = "@";//ფორმატტდება დეითის ველის ტიპი ტექსტად
+                ExcelWorkSheet.Cells[1, "W"] = "Gis_Operator";
+                ExcelWorkSheet.Cells[1, "X"] = "DaTe_1";
+                ExcelWorkSheet.Cells[1, "X"].EntireColumn.NumberFormat = "@";//ფორმატტდება დეითის ველის ტიპი ტექსტად
+                ExcelWorkSheet.Cells[1, "Y"] = "Overlap_CAD_CODE";
+                ExcelWorkSheet.Cells[1, "Z"] = "Owner";
+                ExcelWorkSheet.Cells[1, "AA"] = "Legal_person";
+                ExcelWorkSheet.Cells[1, "AB"] = "Owners";
+                ExcelWorkSheet.Cells[1, "AC"] = "Land_Field_Operator";
+                ExcelWorkSheet.Cells[1, "AD"] = "Note1";
+                ExcelWorkSheet.Cells[1, "AE"] = "Date_2";
+                ExcelWorkSheet.Cells[1, "AF"] = "Land_Gis_Operator";
+                ExcelWorkSheet.Cells[1, "AG"] = "Note1_1";
+                ExcelWorkSheet.Cells[1, "AH"] = "Date_3";
+                ExcelWorkSheet.Cells[1, "AI"] = "CAD_COD";
+                ExcelWorkSheet.Cells[1, "AJ"] = "UNIQ_ID_OLD";
+                ExcelWorkSheet.Cells[1, "AK"] = "UNIQ_ID_NEW";
+                ExcelWorkSheet.Cells[1, "AL"] = "UID";
+                ExcelWorkSheet.Cells[1, "AM"] = "ID";
+                ExcelWorkSheet.Cells[1, "AN"] = "Uniq_Id_NEW";
+
+                for (var r = 0; r < newQarsafari.Count(); r++) // კეთდება ციკლი იმისთვის რო დაიაროს სათითაო ველი და ჩაიწეროს ექსელის შიტში 
+                                                               // R ამ შემთხვევაში ნიშნავს RowNumbers რომ ჩაწერა დაიწყოს მეროე რიგიდან რადგან პირველიში სვეტების სახელები წერია 
+                                                               // ყოველ იტერაციაზე R-ს ერთი ემატება რის გამოც შემდეგ რიგში გადადის ინფორმაციის შევსება 
+                {
+
+                    QarsafariGrouped qarsafariGrouped = geographicDynamicDbContext.QarsafariGroupeds.FirstOrDefault(x => x.UniqIdOld == newQarsafari[r].UniqId);
+                    // ციკლის შიგნით იწერება რომელ სვეტში რა ინფორმაცია ჩაიწეროს 
+
+                    ExcelWorkSheet.Cells[r + 2, "A"] = newQarsafari[r].UniqId;
+                    ExcelWorkSheet.Cells[r + 2, "B"] = newQarsafari[r].LiterId;
+                    ExcelWorkSheet.Cells[r + 2, "C"] = newQarsafari[r].PhotoN;
+                    ExcelWorkSheet.Cells[r + 2, "D"] = newQarsafari[r].Region;
+                    ExcelWorkSheet.Cells[r + 2, "E"] = newQarsafari[r].Municipality;
+                    ExcelWorkSheet.Cells[r + 2, "F"] = newQarsafari[r].AdmMun;
+                    ExcelWorkSheet.Cells[r + 2, "G"] = newQarsafari[r].CityTownVillage;
+                    ExcelWorkSheet.Cells[r + 2, "H"] = newQarsafari[r].LandAreaSqM;
+                    ExcelWorkSheet.Cells[r + 2, "I"] = newQarsafari[r].LandAreaHa;
+                    ExcelWorkSheet.Cells[r + 2, "J"] = newQarsafari[r].Shrubbery;
+                    ExcelWorkSheet.Cells[r + 2, "K"] = newQarsafari[r].WoodyPlantPercent;
+                    ExcelWorkSheet.Cells[r + 2, "L"] = newQarsafari[r].WoodyPlantQuantity;
+                    ExcelWorkSheet.Cells[r + 2, "M"] = newQarsafari[r].VarjisFarti;
+                    ExcelWorkSheet.Cells[r + 2, "N"] = newQarsafari[r].WoodyPlantSpecies;
+
+                    // სადაც სახეობა არ გვიწერია და ხეხილის რაოდენობა იქ იწერება კარგ მდომარეობაში 0 
+                    if (newQarsafari[r].WoodyPlantQuantity == 0)
+                    {
+                        ExcelWorkSheet.Cells[r + 2, "O"] = 0;
+                        ExcelWorkSheet.Cells[r + 2, "P"] = 0;
+                        ExcelWorkSheet.Cells[r + 2, "Q"] = 0;
+                    }
+                    else
+                    {
+                        ExcelWorkSheet.Cells[r + 2, "O"] = Math.Round(Convert.ToDouble(newQarsafari[r].InGoodCondition), 1);
+                        ExcelWorkSheet.Cells[r + 2, "P"] = Math.Round(Convert.ToDouble(newQarsafari[r].ChoppedDown), 1);
+                        ExcelWorkSheet.Cells[r + 2, "Q"] = Math.Round(Convert.ToDouble(newQarsafari[r].Rampike), 1);
+                    }
+                    ExcelWorkSheet.Cells[r + 2, "R"] = newQarsafari[r].SpeciesMediumAge;
+                    ExcelWorkSheet.Cells[r + 2, "S"] = newQarsafari[r].Note;
+                    ExcelWorkSheet.Cells[r + 2, "T"] = newQarsafari[r].Company;
+                    ExcelWorkSheet.Cells[r + 2, "U"] = newQarsafari[r].FieldOperator;
+                    ExcelWorkSheet.Cells[r + 2, "V"] = newQarsafari[r].Date;
+                    ExcelWorkSheet.Cells[r + 2, "W"] = newQarsafari[r].GisOperator;
+                    ExcelWorkSheet.Cells[r + 2, "X"] = newQarsafari[r].DaTe1;
+                    ExcelWorkSheet.Cells[r + 2, "Y"] = newQarsafari[r].OverlapCadCode;
+                    ExcelWorkSheet.Cells[r + 2, "Z"] = newQarsafari[r].Owner;
+                    ExcelWorkSheet.Cells[r + 2, "AA"] = newQarsafari[r].LegalPerson;
+                    ExcelWorkSheet.Cells[r + 2, "AB"] = newQarsafari[r].Owners;
+                    ExcelWorkSheet.Cells[r + 2, "AC"] = newQarsafari[r].LandFieldOperator;
+                    ExcelWorkSheet.Cells[r + 2, "AD"] = newQarsafari[r].Note1;
+                    ExcelWorkSheet.Cells[r + 2, "AE"] = newQarsafari[r].Date2;
+                    ExcelWorkSheet.Cells[r + 2, "AF"] = newQarsafari[r].LandGisOperator;
+                    ExcelWorkSheet.Cells[r + 2, "AG"] = newQarsafari[r].Note11;
+                    ExcelWorkSheet.Cells[r + 2, "AH"] = newQarsafari[r].Date3;
+                    ExcelWorkSheet.Cells[r + 2, "AI"] = newQarsafari[r].CadCod;
+                    ExcelWorkSheet.Cells[r + 2, "AJ"] = newQarsafari[r].UniqIdOld;
+                    ExcelWorkSheet.Cells[r + 2, "AK"] = newQarsafari[r].UniqIdNew;
+                    ExcelWorkSheet.Cells[r + 2, "AL"] = newQarsafari[r].Uid;
+                    ExcelWorkSheet.Cells[r + 2, "AM"] = newQarsafari[r].Id;
+                    ExcelWorkSheet.Cells[r + 2, "AN"] = qarsafariGrouped.UniqId;
+                }
+                ExcelWorkBook.Worksheets[1].Name = "პატარა-ექსელი"; // ვარქმევთ ჩვენ მიერ ზევით შექმნილ შიტს სახელს 
+                ExcelWorkBook.SaveAs(ExcelDestinationPath + "rootExcel.xlsx"); // ვაძლევთ სახელს ექსელის ფაილს ჩვენ მიერ გადმოწოდებული ცვლადის მიხედვით 
+                ExcelWorkBook.Close(); // იხურება ექსელის ფაილი ვეღარ მოვახდენთ მასზე ცვლილებას 
+                ExcelApp.Quit(); //გამოვდივართ აპლიკაციიდან 
+
+                Marshal.ReleaseComObject(ExcelWorkSheet);
+                Marshal.ReleaseComObject(ExcelWorkBook);
+                Marshal.ReleaseComObject(ExcelApp);
+
+                return new Result<bool>
+                {
+                    Success = true,
+                    StatusCode = System.Net.HttpStatusCode.OK
+                };
+
+            }
+            catch (Exception ex)
+            {
+                ExcelWorkBook.Close(); // იხურება ექსელის ფაილი ვეღარ მოვახდენთ მასზე ცვლილებას 
+                ExcelApp.Quit(); //გამოვდივართ აპლიკაციიდან 
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა ექსელში ჩაწერისას!" + ex.Message
+                };
+            }
+
+        }
+
+
+        ///////აქ იქმნება result ფოლდერი თუ შექმნილი არაა და კოპირდება ძირი ექსელის ფაილი სადაც იწერება გადანომრილი uniqId ები 
+        public Result<bool> copyOldExcelOriginal(ExcelReadDTO excelReadDTO)
+        {
+            Result<bool> result = new Result<bool>();
+
+            try
+            {
+                GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
+                var ExcelPath = excelReadDTO.ExcelPath;
+                string excelDirectoryPath = Path.GetDirectoryName(ExcelPath);
+                string fileName = Path.GetFileName(ExcelPath);
+
+                string resultFolderPath = Path.Combine(excelDirectoryPath, "result");
+                string destinationFilePath = Path.Combine(resultFolderPath, fileName);
+
+                // Check if the result folder exists, if not, create it
+                if (!Directory.Exists(resultFolderPath))
+                {
+                    Directory.CreateDirectory(resultFolderPath);
+                }
+
+                // Copy the file to the destination folder
+                File.Copy(ExcelPath, destinationFilePath, true); // 'true' to overwrite if the file already exists
+
+                // Open the copied Excel file and modify it using Interop
+                Application excelApp = new Application();
+                Workbook workbook = excelApp.Workbooks.Open(destinationFilePath);
+                _Worksheet worksheet = workbook.Sheets[1]; // Assuming there is only one sheet
+                Microsoft.Office.Interop.Excel.Range excelRange = worksheet.UsedRange;
+
+                // Find the column index for "Uniq_Id_New"
+                int column = 1;
+                while (worksheet.Cells[1, column].Value != null && worksheet.Cells[1, column].Value.ToString() != "Uniq_Id_New")
+                {
+                    column++;
+                }
+
+                if (worksheet.Cells[1, column].Value == null)
+                {
+                    // If "Uniq_Id_New" header does not exist, add it
+                    worksheet.Cells[1, column].Value = "Uniq_Id_New";
+                }
+
+                // Read Excel data into a dictionary for faster lookup
+                Dictionary<string, string> excelData = new Dictionary<string, string>();
+                int rowCount = worksheet.UsedRange.Rows.Count;
+                for (int i = 2; i <= rowCount; i++) // Assuming data starts from row 2
+                {
+                    string uniqId = worksheet.Cells[i, 1]?.Value?.ToString();
+                    string litterId = worksheet.Cells[i, 2]?.Value?.ToString();
+
+                    // Only add to dictionary if both uniqId and litterId are not null
+                    if (!string.IsNullOrEmpty(uniqId) && !string.IsNullOrEmpty(litterId))
+                    {
+                        excelData.Add($"{uniqId}_{litterId}", worksheet.Cells[i, column]?.Value?.ToString() ?? "");
+                    }
+                }
+
+                // Fetch data from database
+                var dbData = geographicDynamicDbContext.QarsafariGroupeds.ToList();
+
+                // Update Excel with fetched data
+                for (int i = 2; i <= rowCount; i++)
+                {
+                    string excelUniqId = worksheet.Cells[i, 1]?.Value?.ToString();
+                    string excelLitterId = worksheet.Cells[i, 2]?.Value?.ToString();
+
+                    if (!string.IsNullOrEmpty(excelUniqId) && !string.IsNullOrEmpty(excelLitterId))
+                    {
+                        var matchedData = dbData.FirstOrDefault(item => item.UniqIdOld.ToString() == excelUniqId && item.LiterId.ToString() == excelLitterId);
+
+                        if (matchedData != null)
+                        {
+                            worksheet.Cells[i, column].Value = matchedData.UniqId;
+                        }
+                        else
+                        {
+                            // Log or handle rows where no match was found
+                            // You can also throw an exception here if needed
+                            // For example:
+                            throw new Exception($"No matching data found in database for row {i}");
+                        }
+                    }
+                }
+
+                // Save changes and cleanup
+                workbook.Save();
+                workbook.Close();
+                excelApp.Quit();
+                Marshal.ReleaseComObject(excelApp);
+
+                result.Success = true;
+                result.StatusCode = System.Net.HttpStatusCode.OK;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occurred during file operations or Excel manipulation
+                result.Success = false;
+                result.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                result.Message = $"ძირი ექსელის გადაკოპირებისა და მასში ახალი UniqId ჩაწერისას მოხდა შეცდომა. შეცდომის რიგი: {ex.Message}";
+                // Optionally log the exception details for troubleshooting
+            }
+
+            return result;
+        }
+
+
         // ამრგვალებს 5 ის ჯერადზე გადაცემულ რიცხვს
         static int RoundToNearest(double number)
         {
