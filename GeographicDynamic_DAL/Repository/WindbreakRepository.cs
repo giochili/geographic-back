@@ -605,277 +605,289 @@ namespace GeographicDynamic_DAL.Repository
             var AccessShitNameTextbox = excelReadDTO.AccessShitName;
 
 
-            /////////////ფუნქციების გამოძახებები თავის შეცდომიანად თუ სადმე რამე იყო 
-            ////// ვკითხულობთ ექსელიდან ინფორმაციას და შეგვაქვს sql ში qarsafari ცხრილი
-            //var ExcelisWakitxvaRestult = _windbreakMethods.ExcelisWakitxva(excelReadDTO);
-            //if (ExcelisWakitxvaRestult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა ექსელის წაკითხვის დროს" + ExcelisWakitxvaRestult.Message
-            //    };
-            //}
+            ///////////ფუნქციების გამოძახებები თავის შეცდომიანად თუ სადმე რამე იყო 
+            //// ვკითხულობთ ექსელიდან ინფორმაციას და შეგვაქვს sql ში qarsafari ცხრილი
+            var ExcelisWakitxvaRestult = _windbreakMethods.ExcelisWakitxva(excelReadDTO);
+            if (ExcelisWakitxvaRestult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა ექსელის წაკითხვის დროს" + ExcelisWakitxvaRestult.Message
+                };
+            }
 
-            //var fillAmountOfSpecesResult = _windbreakMethods.fillAmountOfSpeces();
-            //if (fillAmountOfSpecesResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "არიქნაა" + fillAmountOfSpecesResult.Message
-            //    };
-            //}
+            var fillAmountOfSpecesResult = _windbreakMethods.fillAmountOfSpeces(excelReadDTO);
+            if (fillAmountOfSpecesResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "არიქნაა" + fillAmountOfSpecesResult.Message
+                };
+            }
 
             List<Qarsafari> newQarsafari = geographicDynamicDbContext.Qarsafaris.OrderBy(m => m.UniqId).ToList();
-            ////ვამოწმებთ Excel-ში თუ არის დუპლიკატი Unic-Liter - ID - ები
-            //var ShemowmebaUnicLiterExcelshiResult = _windbreakMethods.ShemowmebaUnicLiterExcelshi();
-            //if (ShemowmebaUnicLiterExcelshiResult.Success == false)
+            //ვამოწმებთ Excel-ში თუ არის დუპლიკატი Unic-Liter - ID - ები
+            var ShemowmebaUnicLiterExcelshiResult = _windbreakMethods.ShemowmebaUnicLiterExcelshi();
+            if (ShemowmebaUnicLiterExcelshiResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + ShemowmebaUnicLiterExcelshiResult.Message
+                };
+            }
+
+
+
+            // ვკითხულობთ აქსესიდან ინფორმაციას და შეგვაქვს sql ში WindbreakMDB ცხრილი
+            if (AccessShitNameTextbox != "")
+            {
+                var AccessReadingResult = _windbreakMethods.AccessWakitxva(excelReadDTO.AccessFilePath, excelReadDTO.AccessShitName);
+
+                if (AccessReadingResult.Success == false)
+                {
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + AccessReadingResult.Message
+                    };
+                }
+            }
+
+            /////////////////ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს
+            var ShemowmebaAccessExcelUnicLiterDublicatsResult = _windbreakMethods.ShemowmebaAccessExcelUnicLiterDublicats();
+            if (ShemowmebaAccessExcelUnicLiterDublicatsResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = ShemowmebaAccessExcelUnicLiterDublicatsResult.Message + " ზედმეტია: " + ShemowmebaAccessExcelUnicLiterDublicatsResult.Data[0]
+                };
+            }
+
+            if (CalcVarjisFartiCheckbox == true)
+            {
+                var ChaweraVarjisPartiFunction = _windbreakMethods.ChaweraVarjisParti(excelReadDTO.ProjectNameID);
+
+                if (ChaweraVarjisPartiFunction.Success == false)
+                {
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "ვარჯის ფართის დათვლის დროს მოხდა შეცდომა" + ChaweraVarjisPartiFunction.Message
+                    };
+                }
+            }
+            var CheckerOfVarjisFartiandSaxeobaResult = _windbreakMethods.CheckerOfVarjisFartiandSaxeoba();
+            if (CheckerOfVarjisFartiandSaxeobaResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა ვარჯის ფართის ჩაწერისას " + CheckerOfVarjisFartiandSaxeobaResult.Message
+                };
+            }
+            var UIDReplaceExcelResult = _windbreakMethods.UIDReplaceExcel();
+            if (UIDReplaceExcelResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა ექსელში UID-ის ჩაწერის დროს" + UIDReplaceExcelResult.Message
+                };
+            }
+
+            var QarsafariGadanomrvaResult = _windbreakMethods.QarsafariGadanomrva(excelReadDTO.UnicIDStartNumber);
+            if (QarsafariGadanomrvaResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = QarsafariGadanomrvaResult.Message
+                };
+            }
+
+            //aq unda fotoebi renamephotos
+            if (excelReadDTO.GadanomriliaFotoebi != true)
+            {
+                RenamePhotoDTO renamePhotoDTOForRename = new RenamePhotoDTO();
+                renamePhotoDTOForRename.FolderPath = excelReadDTO.FolderPath;
+                renamePhotoDTOForRename.PhotoStartNumber = excelReadDTO.PhotoStartNumber;
+                var RenamePhotosInFolderFromExcel = RenamePhotosInFolder(renamePhotoDTOForRename);
+                if (RenamePhotosInFolderFromExcel.Success == false)
+                {
+                    return new Result<bool>
+                    {
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = RenamePhotosInFolderFromExcel.Message
+                    };
+                }
+            }
+            //aq unda fotoebi renamephotos
+
+            var ProcentisDatvlaResult = _windbreakMethods.QarsafariProcentisDatvla();
+            if (ProcentisDatvlaResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = ProcentisDatvlaResult.Message
+                };
+            }
+
+            // გადაგვაქვს ინფორმაცია აქსესიდან ექსელში
+            var UpdateFromAccessToExcellResult = _windbreakMethods.UpdateFromAccessToExcell();
+            if (UpdateFromAccessToExcellResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UpdateFromAccessToExcellResult.Message
+                };
+            }
+
+            // შევსება ველების სადაც ვინახავთ რომელი მუნიციპალიტეტია და რომელი ეტაპია დათვლის 
+            var FillProjectEtapiIDSResult = _windbreakMethods.FillProjectEtapiIDS(excelReadDTO.ProjectNameID, excelReadDTO.EtapiID);
+            if (FillProjectEtapiIDSResult.Success = false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა პროექტის სახელის და ეტაპის მინიჭების დროს "
+                };
+            }
+            //საკუთრებაში ვწერთ სახელმწიფოა თუ კერძო
+            var FillSakutrebaIsKerdzoOrSaxelmwifoResult = FillSakutrebaIsKerdzoOrSaxelmwifo();
+            if (FillSakutrebaIsKerdzoOrSaxelmwifoResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა საკუთრების მინიჭების დროს "
+                };
+            }
+
+            var UIDReplaceAccessResult = _windbreakMethods.UIDReplaceAccess();
+            if (UIDReplaceAccessResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UIDReplaceAccessResult.Message
+                };
+            }
+
+
+            ////////////axali funqcia UIDREPLACE () {} // table qarsafarshi
+            ////////////SET UID = str([ლიტერი ID]) + str([უნიკ ID]) // str chventan aris Convert.ToString()
+            ///////////// ჯერ არ ვიყიენებთ მარა გამოსაყენებელია ხეხილში ვამოწმებთ დუბლიკატები ხომ არ არის
+            var QarsafariXexilisShemowmebaResult = _windbreakMethods.QarsafariXexilisShemowmeba();
+            if (QarsafariXexilisShemowmebaResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = QarsafariXexilisShemowmebaResult.Message
+                };
+            }
+
+
+
+            // qarsafari ცხრილის დაგრუპვა uniqid ის მიხედვით და გადატანა qarsafariGrouped ში
+            var QarsafariToQarsafariGroupedResult = _windbreakMethods.QarsafariToQarsafariGrouped();
+            if (QarsafariToQarsafariGroupedResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = QarsafariToQarsafariGroupedResult.Message
+                };
+            }
+
+
+
+            var UIDReplaceQarsafariGroupedResult = _windbreakMethods.UIDReplaceQarsafariGrouped();
+            if (UIDReplaceQarsafariGroupedResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UIDReplaceQarsafariGroupedResult.Message
+                };
+            }
+
+
+            var GadanomriliFotoebiToQarsafariGroupedResult = _windbreakMethods.GadanomriliFotoebiToQarsafariGrouped();
+            if (GadanomriliFotoebiToQarsafariGroupedResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = GadanomriliFotoebiToQarsafariGroupedResult.Message
+                };
+            }
+
+            #region ეს აღარ გვჭირდება რადგან არ მუშაობს 
+            //var UPDTFromExcelToAccessResult = _windbreakMethods.UPDTFromExcelToAccess(excelReadDTO.AccessShitName);
+            //if (UPDTFromExcelToAccessResult.Success == false)
             //{
             //    return new Result<bool>
             //    {
             //        Success = false,
             //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + ShemowmebaUnicLiterExcelshiResult.Message
+            //        Message = UPDTFromExcelToAccessResult.Message
             //    };
             //}
+            #endregion
 
-
-
-            //// ვკითხულობთ აქსესიდან ინფორმაციას და შეგვაქვს sql ში WindbreakMDB ცხრილი
-            //if (AccessShitNameTextbox != "")
-            //{
-            //    var AccessReadingResult = _windbreakMethods.AccessWakitxva(excelReadDTO.AccessFilePath, excelReadDTO.AccessShitName);
-
-            //    if (AccessReadingResult.Success == false)
-            //    {
-            //        return new Result<bool>
-            //        {
-            //            Success = false,
-            //            StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //            Message = "მოხდა შეცდომა Access ფაილის წაკითხვისას" + AccessReadingResult.Message
-            //        };
-            //    }
-            //}
-
-            ///////////////////ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს
-            //var ShemowmebaAccessExcelUnicLiterDublicatsResult = _windbreakMethods.ShemowmebaAccessExcelUnicLiterDublicats();
-            //if (ShemowmebaAccessExcelUnicLiterDublicatsResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = ShemowmebaAccessExcelUnicLiterDublicatsResult.Message + " ზედმეტია: " + ShemowmebaAccessExcelUnicLiterDublicatsResult.Data[0]
-            //    };
-            //}
-
-            //if (CalcVarjisFartiCheckbox == true)
-            //{
-            //    var ChaweraVarjisPartiFunction = _windbreakMethods.ChaweraVarjisParti(excelReadDTO.ProjectNameID);
-
-            //    if (ChaweraVarjisPartiFunction.Success == false)
-            //    {
-            //        return new Result<bool>
-            //        {
-            //            Success = false,
-            //            StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //            Message = "ვარჯის ფართის დათვლის დროს მოხდა შეცდომა" + ChaweraVarjisPartiFunction.Message
-            //        };
-            //    }
-            //}
-            //var CheckerOfVarjisFartiandSaxeobaResult = _windbreakMethods.CheckerOfVarjisFartiandSaxeoba();
-            //if (CheckerOfVarjisFartiandSaxeobaResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა ვარჯის ფართის ჩაწერისას " + CheckerOfVarjisFartiandSaxeobaResult.Message
-            //    };
-            //}
-            //var UIDReplaceExcelResult = _windbreakMethods.UIDReplaceExcel();
-            //if (UIDReplaceExcelResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა ექსელში UID-ის ჩაწერის დროს" + UIDReplaceExcelResult.Message
-            //    };
-            //}
-
-            //var QarsafariGadanomrvaResult = _windbreakMethods.QarsafariGadanomrva(excelReadDTO.UnicIDStartNumber);
-            //if (QarsafariGadanomrvaResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = QarsafariGadanomrvaResult.Message
-            //    };
-            //}
-
-            ////aq unda fotoebi renamephotos
-            //if (excelReadDTO.GadanomriliaFotoebi != true)
-            //{
-            //    RenamePhotoDTO renamePhotoDTOForRename = new RenamePhotoDTO();
-            //    renamePhotoDTOForRename.FolderPath = excelReadDTO.FolderPath;
-            //    renamePhotoDTOForRename.PhotoStartNumber = excelReadDTO.PhotoStartNumber;
-            //    var RenamePhotosInFolderFromExcel = RenamePhotosInFolder(renamePhotoDTOForRename);
-            //    if (RenamePhotosInFolderFromExcel.Success == false)
-            //    {
-            //        return new Result<bool>
-            //        {
-            //            Success = false,
-            //            StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //            Message = RenamePhotosInFolderFromExcel.Message
-            //        };
-            //    }
-            //}
-            ////aq unda fotoebi renamephotos
-
-            //var ProcentisDatvlaResult = _windbreakMethods.QarsafariProcentisDatvla();
-            //if (ProcentisDatvlaResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = ProcentisDatvlaResult.Message
-            //    };
-            //}
-
-            //// გადაგვაქვს ინფორმაცია აქსესიდან ექსელში
-            //var UpdateFromAccessToExcellResult = _windbreakMethods.UpdateFromAccessToExcell();
-            //if (UpdateFromAccessToExcellResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UpdateFromAccessToExcellResult.Message
-            //    };
-            //}
-
-            //// შევსება ველების სადაც ვინახავთ რომელი მუნიციპალიტეტია და რომელი ეტაპია დათვლის 
-            //var FillProjectEtapiIDSResult = _windbreakMethods.FillProjectEtapiIDS(excelReadDTO.ProjectNameID, excelReadDTO.EtapiID);
-            //if (FillProjectEtapiIDSResult.Success = false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა პროექტის სახელის და ეტაპის მინიჭების დროს "
-            //    };
-            //}
-            ////საკუთრებაში ვწერთ სახელმწიფოა თუ კერძო
-            //var FillSakutrebaIsKerdzoOrSaxelmwifoResult = FillSakutrebaIsKerdzoOrSaxelmwifo();
-            //if (FillSakutrebaIsKerdzoOrSaxelmwifoResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = "მოხდა შეცდომა საკუთრების მინიჭების დროს "
-            //    };
-            //}
-
-            //var UIDReplaceAccessResult = _windbreakMethods.UIDReplaceAccess();
-            //if (UIDReplaceAccessResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UIDReplaceAccessResult.Message
-            //    };
-            //}
-
-
-            //////////////axali funqcia UIDREPLACE () {} // table qarsafarshi
-            //////////////SET UID = str([ლიტერი ID]) + str([უნიკ ID]) // str chventan aris Convert.ToString()
-            /////////////// ჯერ არ ვიყიენებთ მარა გამოსაყენებელია ხეხილში ვამოწმებთ დუბლიკატები ხომ არ არის
-            //var QarsafariXexilisShemowmebaResult = _windbreakMethods.QarsafariXexilisShemowmeba();
-            //if (QarsafariXexilisShemowmebaResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = QarsafariXexilisShemowmebaResult.Message
-            //    };
-            //}
-
-
-
-            //// qarsafari ცხრილის დაგრუპვა uniqid ის მიხედვით და გადატანა qarsafariGrouped ში
-            //var QarsafariToQarsafariGroupedResult = _windbreakMethods.QarsafariToQarsafariGrouped();
-            //if (QarsafariToQarsafariGroupedResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = QarsafariToQarsafariGroupedResult.Message
-            //    };
-            //}
-
-
-
-            //var UIDReplaceQarsafariGroupedResult = _windbreakMethods.UIDReplaceQarsafariGrouped();
-            //if (UIDReplaceQarsafariGroupedResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UIDReplaceQarsafariGroupedResult.Message
-            //    };
-            //}
-
-
-            //var GadanomriliFotoebiToQarsafariGroupedResult = _windbreakMethods.GadanomriliFotoebiToQarsafariGrouped();
-            //if (GadanomriliFotoebiToQarsafariGroupedResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = GadanomriliFotoebiToQarsafariGroupedResult.Message
-            //    };
-            //}
-
-            //#region ეს აღარ გვჭირდება რადგან არ მუშაობს 
-            ////var UPDTFromExcelToAccessResult = _windbreakMethods.UPDTFromExcelToAccess(excelReadDTO.AccessShitName);
-            ////if (UPDTFromExcelToAccessResult.Success == false)
-            ////{
-            ////    return new Result<bool>
-            ////    {
-            ////        Success = false,
-            ////        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            ////        Message = UPDTFromExcelToAccessResult.Message
-            ////    };
-            ////}
-            //#endregion
-
-            //var UpdateFromQarsafariGroupedToAccessFileResult = _windbreakMethods.UpdateFromQarsafariGroupedToAccessFile(excelReadDTO.AccessShitName, excelReadDTO.AccessFilePath);
-            //if (UpdateFromQarsafariGroupedToAccessFileResult.Success == false)
-            //{
-            //    return new Result<bool>
-            //    {
-            //        Success = false,
-            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-            //        Message = UpdateFromQarsafariGroupedToAccessFileResult.Message
-            //    };
-            //}
-            ///////////// ქარსაფარი გრუპდის ცხრილები რომ ამოექსპორტდეს 
+            var UpdateFromQarsafariGroupedToAccessFileResult = _windbreakMethods.UpdateFromQarsafariGroupedToAccessFile(excelReadDTO.AccessShitName, excelReadDTO.AccessFilePath);
+            if (UpdateFromQarsafariGroupedToAccessFileResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = UpdateFromQarsafariGroupedToAccessFileResult.Message
+                };
+            }
+            /////////// ქარსაფარი გრუპდის ცხრილები რომ ამოექსპორტდეს 
             List<QarsafariGrouped> qarsafariGroupeds = geographicDynamicDbContext.QarsafariGroupeds.OrderBy(m => m.UniqId).ToList();
-            //List<QarsafariGrouped> qarsafariGroupedsSaxelmwifo = geographicDynamicDbContext.QarsafariGroupeds.Where(x => x.Sakutreba == "სახელმწიფო" || x.Sakutreba == "მუნიციპალიტეტი").OrderBy(m => m.UniqId).ToList();
-            //List<QarsafariGrouped> qarsafariGroupedsKerdzo = geographicDynamicDbContext.QarsafariGroupeds.Where(x => x.Sakutreba == "კერძო" || x.Sakutreba == "იურიდიული პირი").OrderBy(m => m.UniqId).ToList();
+            /////////List<QarsafariGrouped> qarsafariGroupedsSaxelmwifo = geographicDynamicDbContext.QarsafariGroupeds.Where(x => x.Sakutreba == "სახელმწიფო" || x.Sakutreba == "მუნიციპალიტეტი").OrderBy(m => m.UniqId).ToList();
+            /////////List<QarsafariGrouped> qarsafariGroupedsKerdzo = geographicDynamicDbContext.QarsafariGroupeds.Where(x => x.Sakutreba == "კერძო" || x.Sakutreba == "იურიდიული პირი").OrderBy(m => m.UniqId).ToList();
 
+
+
+            var WriteToExcelGroupedResult = _windbreakMethods.WriteToExcelGrouped(qarsafariGroupeds, excelReadDTO.ExcelDestinationPath, "QarsafariGrouped-" + DateTime.Now.ToString("yyyy-MM-dd"), excelReadDTO.AccessFilePath, excelReadDTO.AccessShitName);
+            if (WriteToExcelGroupedResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = WriteToExcelGroupedResult.Message,
+                };
+            }
             ///////////////ფუნქციის გამოძახებები
             var copyOriginalExcelResult = _windbreakMethods.copyOldExcelOriginal(excelReadDTO);
             if (copyOriginalExcelResult.Success == false)
@@ -888,16 +900,8 @@ namespace GeographicDynamic_DAL.Repository
                 };
             }
 
-            var WriteToExcelGroupedResult = _windbreakMethods.WriteToExcelGrouped(qarsafariGroupeds, excelReadDTO.ExcelDestinationPath, "QarsafariGrouped-" + DateTime.Now.ToString("yyyy-MM-dd"));
-            if (WriteToExcelGroupedResult.Success == false)
-            {
-                return new Result<bool>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = WriteToExcelGroupedResult.Message,
-                };
-            }
+            ///////aqedan da zeviT 
+
             ////////////////////ეს არააა საჭირო 
             //var WriteToExcelOldRootWithNewUniqId = _windbreakMethods.WriteToExcelRootOne(newQarsafari, excelReadDTO.ExcelDestinationPath);
             //if (WriteToExcelOldRootWithNewUniqId.Success == false)

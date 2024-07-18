@@ -239,7 +239,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
         }
 
         ///////////////////// მეთოდი კრიბავს ხეხილს კარგმდგომარეობაში გაჩეხილი და გამხმარი და შედეგი იწერება მცენარეების რაოდენობის ველში 
-        public Result<bool> fillAmountOfSpeces()
+        public Result<bool> fillAmountOfSpeces(ExcelReadDTO excelReadDTO)
         {
 
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
@@ -254,6 +254,9 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     var Rampike = (item.Rampike != null ? item.Rampike : 0);
                     var ChoppedDown = (item.ChoppedDown != null ? item.ChoppedDown : 0);
                     item.WoodyPlantQuantity = InGoodCondition + Rampike + ChoppedDown;
+                    ///////////აქ ჩაემატა ასევე etapiId და ProjectId ველების შევსება რადგან არქივში გადატანისას ამ ველების მიხედვით ვახდენთ ცვლილებებს
+                    item.EtapiId = excelReadDTO.EtapiID;
+                    item.ProjectId = excelReadDTO.ProjectID;
                 }
                 geographicDynamicDbContext.SaveChanges();
                 return new Result<bool>
@@ -1661,6 +1664,10 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             ExcelApp.Visible = false;
             ExcelWorkBook = ExcelApp.Workbooks.Add(XlWBATemplate.xlWBATWorksheet);
             Worksheet ExcelWorkSheet = ExcelWorkBook.Worksheets[1] as Worksheet;
+
+
+
+
             try
             {
 
@@ -1836,8 +1843,18 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 };
             }
         }
+
+
+
+        public class storedMDB
+        {
+            public string Uniq_Id_MDB { get; set; }
+            public string Uniq_ID_gadanomrili { get; set; }
+        }
+        List<storedMDB> excelDataList = new List<storedMDB>();
+
         //ფუნქცია კითხულობს ბაზას და ქმნის ახალ ექსელის ფაილს რომ ჩაიწეროს მონაცემები მხოლოდ დაგრუპულისთვის 
-        public Result<bool> WriteToExcelGrouped(List<QarsafariGrouped> qarsafariGroupeds, string ExcelDestinationPath, string ExcelName)
+        public Result<bool> WriteToExcelGrouped(List<QarsafariGrouped> qarsafariGroupeds, string ExcelDestinationPath, string ExcelName,string AccessPath,string AccessSheetName)
         {
 
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext(); //უკავშირდება კონტექსტს რომ გაიგოს ცხრილები SQL-დან 
@@ -1848,9 +1865,68 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             ExcelApp.Visible = false; // აქ ვანიჭებთ ექსელის ფანჯარას რომ გამოჩნდეს პროგრამის მსვლელობა 
             ExcelWorkBook = ExcelApp.Workbooks.Add(XlWBATemplate.xlWBATWorksheet);  // იქმნება ახალი ექსელის workbook რომელშიც გვაქ ერთი შიტი და ამ შიტს ვიყენებთ სამომავლოდ 
 
+
+            // Dictionary to store the mapping from the Access file
+            Dictionary<string, string> accessData = new Dictionary<string, string>();
+
+
             try
             {
-                ExcelWorkSheet = ExcelWorkBook.Worksheets[1]; // აქ ვირჩევთ სამუშაო შიტს ვორკბუკიდან(ექსელიდან) ჩვენ შემთხვევაში ერთია და მაგიტომ გვაქ Worksheets[1} ინდექსად 1 
+                // Open and read the Access file
+
+
+                string connectionString = "";
+                if (Path.GetExtension(AccessPath).ToLower().Trim() == ".mdb" && Environment.Is64BitOperatingSystem == false)
+                {
+                    connectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + AccessPath;
+                    connectionString = "Provider=Microsoft.Jet.OLEDBMicrosoft.Jet.OLEDB.4.0;Data Source=" + AccessPath + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
+                }
+                else
+                {
+                    connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + AccessPath;
+                }
+
+
+
+                using (OleDbConnection accessConn = new OleDbConnection(connectionString))
+                {
+                    accessConn.Open();
+                    string query = $"SELECT * FROM [{AccessSheetName}]";
+                    using (OleDbCommand cmd = new OleDbCommand(query, accessConn))
+                    {
+                        using (OleDbDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                int uniqIdNewIndex = reader.GetOrdinal("Uniq_ID_NEW_Gadanomrili");
+                                int uniqIdIndex = reader.GetOrdinal("UNIQ_ID");
+
+                                while (reader.Read())
+                                {
+                                    string uniqIdNewValue = reader.GetValue(uniqIdNewIndex).ToString();
+                                    string uniqIdValue = reader.GetValue(uniqIdIndex).ToString();
+                                    if (!accessData.ContainsKey(uniqIdNewValue))
+                                    {
+                                        accessData[uniqIdNewValue] = uniqIdValue;
+                                    }
+                                    excelDataList.Add(new storedMDB
+                                    {
+                                        Uniq_Id_MDB = uniqIdValue,
+                                        Uniq_ID_gadanomrili = uniqIdNewValue
+                                    });
+
+                                }
+                            }
+                        }
+                    }
+                }
+               
+
+
+
+
+
+                    ExcelWorkSheet = ExcelWorkBook.Worksheets[1]; // აქ ვირჩევთ სამუშაო შიტს ვორკბუკიდან(ექსელიდან) ჩვენ შემთხვევაში ერთია და მაგიტომ გვაქ Worksheets[1} ინდექსად 1 
 
 
                 // ამ კოდის ფრაგმენტებში ივსება სათაურის ველები სხვა სიტყვებით რომ ვთქვათ პირველ row-ში იწერება მნიშვნელობები რამდენი სვეტიც გვაქ (column) 
@@ -1896,6 +1972,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 ExcelWorkSheet.Cells[1, "AK"] = "UNIQ_ID_NEW";
                 ExcelWorkSheet.Cells[1, "AL"] = "UID";
                 ExcelWorkSheet.Cells[1, "AM"] = "ID";
+                ExcelWorkSheet.Cells[1, "AN"] = "Uniq_ID_MDB";
 
                 for (var r = 0; r < qarsafariGroupeds.Count(); r++) // კეთდება ციკლი იმისთვის რო დაიაროს სათითაო ველი და ჩაიწეროს ექსელის შიტში 
                                                                     // R ამ შემთხვევაში ნიშნავს RowNumbers რომ ჩაწერა დაიწყოს მეროე რიგიდან რადგან პირველიში სვეტების სახელები წერია 
@@ -1953,6 +2030,12 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     ExcelWorkSheet.Cells[r + 2, "AK"] = qarsafariGroupeds[r].UniqIdNew;
                     ExcelWorkSheet.Cells[r + 2, "AL"] = qarsafariGroupeds[r].Uid;
                     ExcelWorkSheet.Cells[r + 2, "AM"] = qarsafariGroupeds[r].Id;
+
+                    string uniqIdGadanomrili = qarsafariGroupeds[r].UniqId.ToString();
+                    if (accessData.ContainsKey(uniqIdGadanomrili))
+                    {
+                        ExcelWorkSheet.Cells[r + 2, "AN"] = accessData[uniqIdGadanomrili];
+                    }
                 }
                 ExcelWorkBook.Worksheets[1].Name = "პატარა-ექსელი"; // ვარქმევთ ჩვენ მიერ ზევით შექმნილ შიტს სახელს 
                 ExcelWorkBook.SaveAs(ExcelDestinationPath + $"\\{ExcelName}.xlsx"); // ვაძლევთ სახელს ექსელის ფაილს ჩვენ მიერ გადმოწოდებული ცვლადის მიხედვით 
@@ -2182,6 +2265,18 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     worksheet.Cells[1, column].Value = "Uniq_Id_New";
                 }
 
+                // Find the column index for "Uniq_Id_MDB"
+                while (worksheet.Cells[1, column+1].Value != null && worksheet.Cells[1, column+1].Value.ToString() != "Uniq_Id_MDB")
+                {
+                    column++;
+                }
+
+                if (worksheet.Cells[1, column + 1].Value == null)
+                {
+                    // If "Uniq_Id_MDB" header does not exist, add it
+                    worksheet.Cells[1, column + 1].Value = "Uniq_Id_MDB";
+                }
+
                 // Read Excel data into a dictionary for faster lookup
                 Dictionary<string, string> excelData = new Dictionary<string, string>();
                 int rowCount = worksheet.UsedRange.Rows.Count;
@@ -2221,7 +2316,13 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                             // For example:
                             throw new Exception($"No matching data found in database for row {i}");
                         }
+                        if (true)
+                        {
+                            worksheet.Cells[i, column + 1].Value = excelDataList.FirstOrDefault(m => m.Uniq_ID_gadanomrili == matchedData.UniqId.ToString()).Uniq_Id_MDB;
+
+                        }
                     }
+                    
                 }
 
                 // Save changes and cleanup
