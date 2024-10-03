@@ -377,103 +377,105 @@ namespace GeographicDynamic_DAL.Repository
             int photocount = renamePhotoDTO.PhotoStartNumber;
             var random = new Random();
             var tempFolderCount = random.Next(100000, 999999);
-
-            if (renamePhotoDTO.Gadanomrilia == false)
+            if (false)
             {
-                try
+                if (renamePhotoDTO.Gadanomrilia == false)
                 {
-                    #region აქ კეთდება წინასწარ რანდომ რიცხვის მიმატება ფოლდდერების სახელებს მანამ გადანომვრას დავიწყებთ
-                    ////ფაილების გადანომვრა 
-                    //foreach (var folderPath in directories)
-                    //{                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
-                    //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-                    //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-                    //    foreach (var items in list)
-                    //    {
-                    //        var idx = items.LastIndexOf('\\');
-                    //        string kk = items.Substring(idx + 1);
-
-                    //        var newname = items.Replace(kk, Convert.ToString(foldercount)); //es mushaobs
-
-                    //        int idx11 = items.LastIndexOf('\\');
-                    //        string oldfoldername = items.Substring(0, idx11);
-                    //        string newnamefolder = oldfoldername + "\\" + tempFolderCount; //ჯერ ეს უნდა გავუშვათ 
-
-                    //        Directory.Move(items, newnamefolder);
-                    //        tempFolderCount++;
-                    //    }
-                    //}
-                    #endregion
-                    //გადანომვრის ციკლი შერჩეული რიცხვით სადანაც გვინდა დაიწყოს 
-                    List<Qarsafari> qarsafarisForRename = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").ToList();
-                    foreach (var item in qarsafarisForRename)
+                    try
                     {
-                        // ჯერ ვეძებთ არჩეულ ფოლდერში ლიტერიდი თი შესაბამის ფოლდერს
-                        string folderLiterIDPath = Directory.GetDirectories(renamePhotoDTO.FolderPath, item.LiterId.ToString(), SearchOption.AllDirectories).FirstOrDefault();
-                        // ჯერ ვეძებთ არჩეულ ფოლდერში უნიკიდი თი შესაბამის 
-                        string folderUniqIDPath = Directory.GetDirectories(folderLiterIDPath, item.UniqIdOld.ToString(), SearchOption.AllDirectories).FirstOrDefault();
-                        if (!string.IsNullOrEmpty(folderUniqIDPath)) //თუ იპოვა
-                        {
+                        #region აქ კეთდება წინასწარ რანდომ რიცხვის მიმატება ფოლდდერების სახელებს მანამ გადანომვრას დავიწყებთ
+                        ////ფაილების გადანომვრა 
+                        //foreach (var folderPath in directories)
+                        //{                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
+                        //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                        //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                        //    foreach (var items in list)
+                        //    {
+                        //        var idx = items.LastIndexOf('\\');
+                        //        string kk = items.Substring(idx + 1);
 
-                            int idx11 = folderUniqIDPath.LastIndexOf('\\');
-                            string oldfoldername = folderUniqIDPath.Substring(0, idx11);
-                            string newnamefolder = oldfoldername + "\\" + Convert.ToString(item.UniqId.ToString() + tempFolderCount);
-                            Directory.Move(folderUniqIDPath, newnamefolder);
+                        //        var newname = items.Replace(kk, Convert.ToString(foldercount)); //es mushaobs
 
-                        }
-                        else // თუ ვერ იპოვა
-                        {
-                            return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "უნიკიდ" + item.UniqIdOld.ToString() + " ვერ მოიძებნა ფოლდერებში" };
-                        }
-                    }
-                    // რომ დასრულდება ბოლოს ფოლდერის სახელებს უნდა ჩამოვაჭრათ ბოლო 6 სიმბოლო რაც წინასწარ დავუმატეთ
-                    foreach (var folderPath in directories)
-                    {                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
-                        var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
-                        var list = directories1.OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
-                        foreach (var items in list)
-                        {
+                        //        int idx11 = items.LastIndexOf('\\');
+                        //        string oldfoldername = items.Substring(0, idx11);
+                        //        string newnamefolder = oldfoldername + "\\" + tempFolderCount; //ჯერ ეს უნდა გავუშვათ 
 
-                            // Rename the current folder
-                            string folderNameOld = Path.GetFileName(items);
-                            string newFolderName = folderNameOld.Replace(tempFolderCount.ToString(), "");
-                            if (newFolderName != folderNameOld)
+                        //        Directory.Move(items, newnamefolder);
+                        //        tempFolderCount++;
+                        //    }
+                        //}
+                        #endregion
+                        //გადანომვრის ციკლი შერჩეული რიცხვით სადანაც გვინდა დაიწყოს 
+                        List<Qarsafari> qarsafarisForRename = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").ToList();
+                        foreach (var item in qarsafarisForRename)
+                        {
+                            // ჯერ ვეძებთ არჩეულ ფოლდერში ლიტერიდი თი შესაბამის ფოლდერს
+                            string folderLiterIDPath = Directory.GetDirectories(renamePhotoDTO.FolderPath, item.LiterId.ToString(), SearchOption.AllDirectories).FirstOrDefault();
+                            // ჯერ ვეძებთ არჩეულ ფოლდერში უნიკიდი თი შესაბამის 
+                            string folderUniqIDPath = Directory.GetDirectories(folderLiterIDPath, item.UniqIdOld.ToString(), SearchOption.AllDirectories).FirstOrDefault();
+                            if (!string.IsNullOrEmpty(folderUniqIDPath)) //თუ იპოვა
                             {
-                                string newFolderPath = Path.Combine(folderPath, newFolderName);
 
-                                Directory.Move(items, newFolderPath);
+                                int idx11 = folderUniqIDPath.LastIndexOf('\\');
+                                string oldfoldername = folderUniqIDPath.Substring(0, idx11);
+                                string newnamefolder = oldfoldername + "\\" + Convert.ToString(item.UniqId.ToString() + tempFolderCount);
+                                Directory.Move(folderUniqIDPath, newnamefolder);
+
                             }
-
+                            else // თუ ვერ იპოვა
+                            {
+                                return new Result<bool> { Success = false, StatusCode = System.Net.HttpStatusCode.OK, Message = "უნიკიდ" + item.UniqIdOld.ToString() + " ვერ მოიძებნა ფოლდერებში" };
+                            }
                         }
+                        // რომ დასრულდება ბოლოს ფოლდერის სახელებს უნდა ჩამოვაჭრათ ბოლო 6 სიმბოლო რაც წინასწარ დავუმატეთ
+                        foreach (var folderPath in directories)
+                        {                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
+                            var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
+                            var list = directories1.OrderBy(filePath => Convert.ToDouble(Path.GetFileNameWithoutExtension(filePath)));
+                            foreach (var items in list)
+                            {
+
+                                // Rename the current folder
+                                string folderNameOld = Path.GetFileName(items);
+                                string newFolderName = folderNameOld.Replace(tempFolderCount.ToString(), "");
+                                if (newFolderName != folderNameOld)
+                                {
+                                    string newFolderPath = Path.Combine(folderPath, newFolderName);
+
+                                    Directory.Move(items, newFolderPath);
+                                }
+
+                            }
+                        }
+
+                        //// ძველი გადანომვრა
+                        //foreach (var folderPath in directories)
+                        //{
+                        //    int idx2 = folderPath.LastIndexOf('\\');
+                        //    var kk2 = Convert.ToInt32(folderPath.Substring(idx2 + 1));
+
+                        //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+
+                        //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+
+                        //    foreach (var items in list)
+                        //    {
+                        //        var idx = items.LastIndexOf('\\');
+                        //        string kk = items.Substring(idx + 1);
+
+                        //        var newname = items.Replace(kk, Convert.ToString(foldercount)); //es mushaobs
+
+                        //        int idx11 = items.LastIndexOf('\\');
+                        //        string oldfoldername = items.Substring(0, idx11);
+                        //        string newnamefolder = oldfoldername + "\\" + Convert.ToString(foldercount);
+                        //        Directory.Move(items, newnamefolder);
+
+                        //        foldercount++;
+                        //    }
+                        //}
                     }
-
-                    //// ძველი გადანომვრა
-                    //foreach (var folderPath in directories)
-                    //{
-                    //    int idx2 = folderPath.LastIndexOf('\\');
-                    //    var kk2 = Convert.ToInt32(folderPath.Substring(idx2 + 1));
-
-                    //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-
-                    //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-
-                    //    foreach (var items in list)
-                    //    {
-                    //        var idx = items.LastIndexOf('\\');
-                    //        string kk = items.Substring(idx + 1);
-
-                    //        var newname = items.Replace(kk, Convert.ToString(foldercount)); //es mushaobs
-
-                    //        int idx11 = items.LastIndexOf('\\');
-                    //        string oldfoldername = items.Substring(0, idx11);
-                    //        string newnamefolder = oldfoldername + "\\" + Convert.ToString(foldercount);
-                    //        Directory.Move(items, newnamefolder);
-
-                    //        foldercount++;
-                    //    }
-                    //}
+                    catch (Exception ex) { }
                 }
-                catch (Exception ex) { }
             }
             //ფოტოების გადანომვრა 
             try
@@ -508,11 +510,11 @@ namespace GeographicDynamic_DAL.Repository
                             if (!f6.Name.Contains(".db"))
                             {
                                 var ext = Path.GetExtension(f6.FullName);
-                                var newPhotoNamePath = f6.FullName.Replace(f6.Name, Convert.ToString(photocount) + ext);
-                                File.Move(f6.FullName, newPhotoNamePath);
-
-                                photoN += Convert.ToString(photocount) + "/";
-
+                                //var newPhotoNamePath = f6.FullName.Replace(f6.Name, Convert.ToString(photocount) + ext);
+                                //File.Move(f6.FullName, newPhotoNamePath); // ar vnomravt fotoebs tetritskaroSi
+                                var newPhotoNamePath = f6.FullName;
+                                //photoN += Convert.ToString(photocount) + "/" ;
+                                photoN += Convert.ToInt32(Path.GetFileNameWithoutExtension(f6.FullName)) + "/";
                                 //ფოტოს თარიღის წამოღება
                                 bool isWritten = false;
                                 if (!isWritten)
@@ -596,8 +598,6 @@ namespace GeographicDynamic_DAL.Repository
 
             //var createResultFolder = _windbreakMethods.copyOldExcelOriginal(excelReadDTO);
 
-
-
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
 
             ////////// ჩეკბოქსების გამოტანა ცვლადში რომ ადვილად აიწყოს შემოწმება 
@@ -660,15 +660,31 @@ namespace GeographicDynamic_DAL.Repository
                 }
             }
 
-            /////////////////ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს
-            var ShemowmebaAccessExcelUnicLiterDublicatsResult = _windbreakMethods.ShemowmebaAccessExcelUnicLiterDublicats();
-            if (ShemowmebaAccessExcelUnicLiterDublicatsResult.Success == false)
+            ///////////////////ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს
+            //var ShemowmebaAccessExcelUnicLiterDublicatsResult = _windbreakMethods.ShemowmebaAccessExcelUnicLiterDublicats(excelReadDTO.FolderPath);
+            //if (ShemowmebaAccessExcelUnicLiterDublicatsResult.Success == false)
+            //{
+
+            //    string mismatches = string.Join(", ", ShemowmebaAccessExcelUnicLiterDublicatsResult.Data);
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = ShemowmebaAccessExcelUnicLiterDublicatsResult.Message + " ზედმეტია: " + mismatches
+            //    };
+            //}
+            var ShemowmebaAccessExcelUnicLiterDublicatsResult = _windbreakMethods.ShemowmebaAccessExcelUnicLiterDublicats(excelReadDTO.FolderPath);
+
+            if (!ShemowmebaAccessExcelUnicLiterDublicatsResult.Success)
             {
+                // Ensure Data is not null and handle gracefully
+
+
                 return new Result<bool>
                 {
                     Success = false,
                     StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = ShemowmebaAccessExcelUnicLiterDublicatsResult.Message + " ზედმეტია: " + ShemowmebaAccessExcelUnicLiterDublicatsResult.Data[0]
+                    Message = ShemowmebaAccessExcelUnicLiterDublicatsResult.Message + " ზედმეტია: " + string.Join(", ", ShemowmebaAccessExcelUnicLiterDublicatsResult.Data)
                 };
             }
 
@@ -706,7 +722,7 @@ namespace GeographicDynamic_DAL.Repository
                     Message = "მოხდა შეცდომა ექსელში UID-ის ჩაწერის დროს" + UIDReplaceExcelResult.Message
                 };
             }
-
+            //თეთრიწყაროსთვის დაკომენტარდა
             var QarsafariGadanomrvaResult = _windbreakMethods.QarsafariGadanomrva(excelReadDTO.UnicIDStartNumber);
             if (QarsafariGadanomrvaResult.Success == false)
             {
@@ -877,7 +893,11 @@ namespace GeographicDynamic_DAL.Repository
             /////////List<QarsafariGrouped> qarsafariGroupedsKerdzo = geographicDynamicDbContext.QarsafariGroupeds.Where(x => x.Sakutreba == "კერძო" || x.Sakutreba == "იურიდიული პირი").OrderBy(m => m.UniqId).ToList();
 
 
+            /////////ამით ვიძახებთ SQL stored proccedure-ს რადგან შევიტანოთ არქივში გადათვლილი მონაცემები და შემდეგისთვის გამოვიყენოთ 
+            geographicDynamicDbContext.Database.ExecuteSqlRaw("[dbo].[insertQarasafariToArqivi]");
 
+
+            ///////////აქ ხდება უშუალოდ ექსპორტი სიისა რაც შევინახეთ qarsafariGrouped-ში
             var WriteToExcelGroupedResult = _windbreakMethods.WriteToExcelGrouped(qarsafariGroupeds, excelReadDTO.ExcelDestinationPath, "QarsafariGrouped-" + DateTime.Now.ToString("yyyy-MM-dd"), excelReadDTO.AccessFilePath, excelReadDTO.AccessShitName);
             if (WriteToExcelGroupedResult.Success == false)
             {
@@ -889,16 +909,16 @@ namespace GeographicDynamic_DAL.Repository
                 };
             }
             ///////////////ფუნქციის გამოძახებები
-            var copyOriginalExcelResult = _windbreakMethods.copyOldExcelOriginal(excelReadDTO);
-            if (copyOriginalExcelResult.Success == false)
-            {
-                return new Result<bool>
-                {
-                    Success = false,
-                    StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = copyOriginalExcelResult.Message,
-                };
-            }
+            //var copyOriginalExcelResult = _windbreakMethods.copyOldExcelOriginal(excelReadDTO);
+            //if (copyOriginalExcelResult.Success == false)
+            //{
+            //    return new Result<bool>
+            //    {
+            //        Success = false,
+            //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+            //        Message = copyOriginalExcelResult.Message,
+            //    };
+            //}
 
             ///////aqedan da zeviT 
 

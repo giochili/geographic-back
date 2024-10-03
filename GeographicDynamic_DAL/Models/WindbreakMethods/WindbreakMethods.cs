@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -317,76 +318,251 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
 
         #region მოწმდება MDB Excel და fotoebi და გამოქავს შედეგი თუ სადმე ცხრილებს შორის დუბლიკატია ანდა რამე ზედმეტი ან ნაკლებია
-        public Result<string?> ShemowmebaAccessExcelUnicLiterDublicats()
+
+
+        ///// //////////// იქმნება იმისთვის რომ გაკეთდეს ლისტი ფოტოებისთვის რომ შემდეგ გამოვიყენოთ შესამოწმებლად 
+
+
+
+        //    public Result<string?>ShemowmebaAccessExcelUnicLiterDublicats()
+        //{
+        //    GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
+
+        //    string uniqIdsNotInAccessList = "";
+        //    List<string> uniqIdsNotInAccessListActual = new List<string>();
+        //    try
+        //    {
+
+        //        #region ALEKS
+
+        //        //List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").ToList();
+        //        //List<WindbreakMdb> windbreakMdbs = geographicDynamicDbContext.WindbreakMdbs.ToList();
+
+        //        //bool emtxveva = true;
+        //        //foreach (var excel in qarsafaris)
+        //        //{
+        //        //    foreach (var mdb in windbreakMdbs)
+        //        //    {
+        //        //        if (mdb.UniqId == excel.UniqId && mdb.LiterId == excel.LiterId)
+        //        //        {
+        //        //            emtxveva = false;
+        //        //        }
+        //        //    }
+        //        //}
+
+
+        //        #endregion
+
+
+        //        #region gio
+        //        //List<double?> distinctUniqIds = geographicDynamicDbContext.Qarsafaris.OrderBy(m => m.UniqId).Select(q => q.UniqId).Distinct().ToList();
+        //        //List<double?> AccessList = geographicDynamicDbContext.WindbreakMdbs.OrderBy(m => m.UniqId).Select(q => q.UniqId).Distinct().ToList();
+
+        //        //foreach (var item in AccessList)
+        //        //{
+        //        //    if (!distinctUniqIds.Contains(item))
+        //        //    {
+        //        //        uniqIdsNotInAccessList.Add(item);
+        //        //    }
+        //        //}
+
+        //        //if (uniqIdsNotInAccessList.Count > 0)
+        //        //{
+        //        //    return new Result<double?>
+        //        //    {
+        //        //        Success = false,
+        //        //        Data = uniqIdsNotInAccessList,
+        //        //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+        //        //        Message = "მოხდა შეცდომა ! Access და Excel UniqId-ები არ ემთხვევა ერთმანეთს !"
+        //        //    };
+        //        //}
+
+        //        //return new Result<double?>
+        //        //{
+        //        //    Success = true,
+        //        //    Data = uniqIdsNotInAccessList,
+        //        //    StatusCode = System.Net.HttpStatusCode.OK,
+        //        //    Message = "წარნატებით დასრულდა შემოწმება Access და Excel UniqId-ის "
+        //        //};
+        //        #endregion
+
+
+        //        List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").Select(x => new Qarsafari { UniqId = x.UniqId, LiterId = x.LiterId }).ToList();
+
+        //        var duplicates = qarsafaris.GroupBy(q => new { q.UniqId, q.LiterId }).Where(g => g.Count() > 1).SelectMany(g => g);
+
+        //        if (duplicates.Any())
+        //        {
+        //            //Console.WriteLine("Duplicates found:");
+        //            foreach (var duplicate in duplicates)
+        //            {
+        //                uniqIdsNotInAccessList += $"{duplicate.LiterId}-{duplicate.UniqId})";
+        //            }
+        //            return new Result<string?>
+        //            {
+        //                Success = false,
+        //                //Data = uniqIdsNotInAccessList,
+        //                StatusCode = System.Net.HttpStatusCode.BadGateway,
+        //                Message = "მოხდა შეცდომა ! Excel UniqId  !: " + uniqIdsNotInAccessList
+        //            };
+        //        }
+
+        //        List<WindbreakMdb> windbreakMdbs = geographicDynamicDbContext.WindbreakMdbs.Select(x => new WindbreakMdb { UniqId = x.UniqId, LiterId = x.LiterId }).ToList();
+
+        //        var duplicatesMDB = qarsafaris.GroupBy(q => new { q.UniqId, q.LiterId }).Where(g => g.Count() > 1).SelectMany(g => g);
+
+        //        if (!duplicates.Any())
+        //        {
+
+        //            //Console.WriteLine("Duplicates found:");
+        //            foreach (var duplicate in duplicatesMDB)
+        //            {
+        //                uniqIdsNotInAccessList += $"{duplicate.LiterId}-{duplicate.UniqId})";
+        //                return new Result<string?>
+        //                {
+        //                    Success = false,
+        //                    //Data = uniqIdsNotInAccessList,
+        //                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+        //                    Message = "მოხდა შეცდომა ! Excel UniqId  !"
+        //                };
+        //            }
+        //        }
+
+        //            List<Qarsafari> resultList = qarsafaris.Where(u => windbreakMdbs.Any(l => l.LiterId == u.LiterId && l.UniqId == u.UniqId)).ToList();
+
+        //            /////////ესენი დაკომენტარებული იო და ახლა გასატესტია
+        //            foreach (var excel in qarsafaris)
+        //            {
+        //                bool existsInList = windbreakMdbs.Any(x => x.UniqId == excel.UniqId && x.LiterId == excel.LiterId);
+        //                if (!existsInList)
+        //                {
+        //                    uniqIdsNotInAccessListActual.Add(string.Concat(excel.UniqId, "-", excel.LiterId, "excel"));
+        //                    //uniqIdsNotInAccessListActual.Add(string.Concat(excel.UniqId.ToString(), "-", excel.LiterId.ToString(), "excel"));
+
+        //                }
+        //            }
+        //            foreach (var access in windbreakMdbs)
+        //            {
+        //                bool existsInList = qarsafaris.Any(x => x.UniqId == access.UniqId && x.LiterId == access.LiterId);
+        //                if (!existsInList)
+        //                {
+        //                    uniqIdsNotInAccessListActual.Add(string.Concat(access.UniqId, "-", access.LiterId, "access"));
+        //                }
+        //            }
+        //            resultList = qarsafaris.Where(u => windbreakMdbs.Any(l => l.LiterId == u.LiterId && l.UniqId == u.UniqId)).ToList();
+
+
+        //            if (uniqIdsNotInAccessListActual.Count != 0)
+        //            {
+        //                string? concatenatedString = "";
+        //                foreach (var item in resultList)
+        //                {
+        //                    concatenatedString += $"{item.LiterId}-{item.UniqId}";
+        //                }
+
+        //                return new Result<string?>
+        //                {
+        //                    Success = false,
+        //                    Data = uniqIdsNotInAccessListActual.ToList(),
+        //                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+        //                    Message = "მოხდა შეცდომა ! Excel და Access რაოდენობა არ ემთხვევა!"
+        //                };
+        //            }
+
+        //            return new Result<string?>
+        //            {
+        //                Success = true,
+        //                //Data = uniqIdsNotInAccessList,
+        //                StatusCode = System.Net.HttpStatusCode.OK,
+        //                Message = "წარნატებით დასრულდა შემოწმება access და excel uniqid-ის "
+        //            };
+
+        //        return new Result<string?> { Success = true, StatusCode = System.Net.HttpStatusCode.OK };
+
+        //    }
+        //    catch
+        //    {
+        //        return new Result<string?>
+        //        {
+        //            Success = false,
+        //            StatusCode = System.Net.HttpStatusCode.BadGateway,
+        //            Message = "წარუმატებლად შესრულდა შემოწმება access და excel uniqid-ის "
+        //        };
+        //    }
+        //}
+        #endregion
+
+
+
+
+        #region შემოწმება MDB,EXCEL, Fotos და გამოაქ შედეგი თუ სადმე ზედმეტი არის UNIQ_ID ანდ LItter_ID
+
+
+
+        public class DirectoryProcessor
+        {
+            public List<(string LitterId, string UniqId)> GetLitterAndUniqIds(string rootFolderPath)
+            {
+                var result = new List<(string LitterId, string UniqId)>();
+
+                if (Directory.Exists(rootFolderPath))
+                {
+                    var litterDirectories = Directory.GetDirectories(rootFolderPath);
+
+                    foreach (var litterDir in litterDirectories)
+                    {
+                        var litterId = Path.GetFileName(litterDir);
+                        var uniqDirectories = Directory.GetDirectories(litterDir);
+
+                        foreach (var uniqDir in uniqDirectories)
+                        {
+                            var uniqId = Path.GetFileName(uniqDir);
+                            result.Add((litterId, uniqId));
+                        }
+                    }
+                }
+
+                return result;
+            }
+        }
+        public class Result<T>
+        {
+            public bool Success { get; set; }
+            public T? Data { get; set; }
+            public HttpStatusCode StatusCode { get; set; }
+            public string Message { get; set; } = string.Empty;
+        }
+        public Result<string?> ShemowmebaAccessExcelUnicLiterDublicats(string rootFolderPath)
         {
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
+            DirectoryProcessor directoryProcessor = new DirectoryProcessor();
 
             string uniqIdsNotInAccessList = "";
             List<string> uniqIdsNotInAccessListActual = new List<string>();
+
             try
             {
+                // Get litter and uniq ids from the directory structure
+                var directoryEntries = directoryProcessor.GetLitterAndUniqIds(rootFolderPath);
 
-                #region ALEKS
+                // Fetch data from the database
+                List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris
+                    .Where(m => m.IsUniqLiterNull == "true")
+                    .Select(x => new Qarsafari { UniqId = x.UniqId, LiterId = x.LiterId })
+                    .ToList();
 
-                //List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").ToList();
-                //List<WindbreakMdb> windbreakMdbs = geographicDynamicDbContext.WindbreakMdbs.ToList();
+                List<WindbreakMdb> windbreakMdbs = geographicDynamicDbContext.WindbreakMdbs
+                    .Select(x => new WindbreakMdb { UniqId = x.UniqId, LiterId = x.LiterId })
+                    .ToList();
 
-                //bool emtxveva = true;
-                //foreach (var excel in qarsafaris)
-                //{
-                //    foreach (var mdb in windbreakMdbs)
-                //    {
-                //        if (mdb.UniqId == excel.UniqId && mdb.LiterId == excel.LiterId)
-                //        {
-                //            emtxveva = false;
-                //        }
-                //    }
-                //}
-
-
-                #endregion
-
-
-                #region gio
-                //List<double?> distinctUniqIds = geographicDynamicDbContext.Qarsafaris.OrderBy(m => m.UniqId).Select(q => q.UniqId).Distinct().ToList();
-                //List<double?> AccessList = geographicDynamicDbContext.WindbreakMdbs.OrderBy(m => m.UniqId).Select(q => q.UniqId).Distinct().ToList();
-
-                //foreach (var item in AccessList)
-                //{
-                //    if (!distinctUniqIds.Contains(item))
-                //    {
-                //        uniqIdsNotInAccessList.Add(item);
-                //    }
-                //}
-
-                //if (uniqIdsNotInAccessList.Count > 0)
-                //{
-                //    return new Result<double?>
-                //    {
-                //        Success = false,
-                //        Data = uniqIdsNotInAccessList,
-                //        StatusCode = System.Net.HttpStatusCode.BadGateway,
-                //        Message = "მოხდა შეცდომა ! Access და Excel UniqId-ები არ ემთხვევა ერთმანეთს !"
-                //    };
-                //}
-
-                //return new Result<double?>
-                //{
-                //    Success = true,
-                //    Data = uniqIdsNotInAccessList,
-                //    StatusCode = System.Net.HttpStatusCode.OK,
-                //    Message = "წარნატებით დასრულდა შემოწმება Access და Excel UniqId-ის "
-                //};
-                #endregion
-
-
-                List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris.Where(m => m.IsUniqLiterNull == "true").Select(x => new Qarsafari { UniqId = x.UniqId, LiterId = x.LiterId }).ToList();
-
-                var duplicates = qarsafaris.GroupBy(q => new { q.UniqId, q.LiterId }).Where(g => g.Count() > 1).SelectMany(g => g);
+                // Check for duplicates in qarsafaris
+                var duplicates = qarsafaris
+                    .GroupBy(q => new { q.UniqId, q.LiterId })
+                    .Where(g => g.Count() > 1)
+                    .SelectMany(g => g);
 
                 if (duplicates.Any())
                 {
-                    //Console.WriteLine("Duplicates found:");
                     foreach (var duplicate in duplicates)
                     {
                         uniqIdsNotInAccessList += $"{duplicate.LiterId}-{duplicate.UniqId})";
@@ -394,104 +570,112 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     return new Result<string?>
                     {
                         Success = false,
-                        //Data = uniqIdsNotInAccessList,
                         StatusCode = System.Net.HttpStatusCode.BadGateway,
                         Message = "მოხდა შეცდომა ! Excel UniqId  !: " + uniqIdsNotInAccessList
                     };
                 }
 
-                List<WindbreakMdb> windbreakMdbs = geographicDynamicDbContext.WindbreakMdbs.Select(x => new WindbreakMdb { UniqId = x.UniqId, LiterId = x.LiterId }).ToList();
+                // Check for duplicates in windbreakMdbs
+                var duplicatesMDB = windbreakMdbs
+                    .GroupBy(w => new { w.UniqId, w.LiterId })
+                    .Where(g => g.Count() > 1)
+                    .SelectMany(g => g);
 
-                var duplicatesMDB = qarsafaris.GroupBy(q => new { q.UniqId, q.LiterId }).Where(g => g.Count() > 1).SelectMany(g => g);
-
-                if (!duplicates.Any())
+                if (duplicatesMDB.Any())
                 {
-
-                    //Console.WriteLine("Duplicates found:");
                     foreach (var duplicate in duplicatesMDB)
                     {
                         uniqIdsNotInAccessList += $"{duplicate.LiterId}-{duplicate.UniqId})";
-                        return new Result<string?>
-                        {
-                            Success = false,
-                            //Data = uniqIdsNotInAccessList,
-                            StatusCode = System.Net.HttpStatusCode.BadGateway,
-                            Message = "მოხდა შეცდომა ! Excel UniqId  !"
-                        };
                     }
-
-
-
-                    List<Qarsafari> resultList = qarsafaris.Where(u => windbreakMdbs.Any(l => l.LiterId == u.LiterId && l.UniqId == u.UniqId)).ToList();
-
-                    /////////ესენი დაკომენტარებული იო და ახლა გასატესტია
-                    foreach (var excel in qarsafaris)
-                    {
-                        bool existsInList = windbreakMdbs.Any(x => x.UniqId == excel.UniqId && x.LiterId == excel.LiterId);
-                        if (!existsInList)
-                        {
-                            uniqIdsNotInAccessListActual.Add(string.Concat(excel.UniqId, "-", excel.LiterId, "excel"));
-                            //uniqIdsNotInAccessListActual.Add(string.Concat(excel.UniqId.ToString(), "-", excel.LiterId.ToString(), "excel"));
-
-                        }
-                    }
-                    foreach (var access in windbreakMdbs)
-                    {
-                        bool existsInList = qarsafaris.Any(x => x.UniqId == access.UniqId && x.LiterId == access.LiterId);
-                        if (!existsInList)
-                        {
-                            uniqIdsNotInAccessListActual.Add(string.Concat(access.UniqId, "-", access.LiterId, "access"));
-                        }
-                    }
-                    resultList = qarsafaris.Where(u => windbreakMdbs.Any(l => l.LiterId == u.LiterId && l.UniqId == u.UniqId)).ToList();
-
-
-                    if (uniqIdsNotInAccessListActual.Count != 0)
-                    {
-                        string? concatenatedString = "";
-                        foreach (var item in resultList)
-                        {
-                            concatenatedString += $"{item.LiterId}-{item.UniqId}";
-                        }
-
-                        return new Result<string?>
-                        {
-                            Success = false,
-                            Data = uniqIdsNotInAccessListActual.ToList(),
-                            StatusCode = System.Net.HttpStatusCode.BadGateway,
-                            Message = "მოხდა შეცდომა ! Excel და Access რაოდენობა არ ემთხვევა!"
-                        };
-                    }
-
-
-
-
-
-
-
                     return new Result<string?>
                     {
-                        Success = true,
-                        //Data = uniqIdsNotInAccessList,
-                        StatusCode = System.Net.HttpStatusCode.OK,
-                        Message = "წარნატებით დასრულდა შემოწმება access და excel uniqid-ის "
+                        Success = false,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "მოხდა შეცდომა ! Access UniqId  !: " + uniqIdsNotInAccessList
                     };
                 }
 
-                return new Result<string?> { Success = true, StatusCode = System.Net.HttpStatusCode.OK };
+                // Check for unmatched entries
+                foreach (var excel in qarsafaris)
+                {
+                    bool existsInList = windbreakMdbs.Any(x => x.UniqId == excel.UniqId && x.LiterId == excel.LiterId);
+                    if (!existsInList)
+                    {
+                        uniqIdsNotInAccessListActual.Add($"{excel.UniqId}-{excel.LiterId} (Excel)");
+                    }
+                }
 
+                foreach (var access in windbreakMdbs)
+                {
+                    bool existsInList = qarsafaris.Any(x => x.UniqId == access.UniqId && x.LiterId == access.LiterId);
+                    if (!existsInList)
+                    {
+                        uniqIdsNotInAccessListActual.Add($"{access.UniqId}-{access.LiterId} (Access)");
+                    }
+                }
+
+                if (uniqIdsNotInAccessListActual.Count != 0)
+                {
+                    return new Result<string?>
+                    {
+                        Success = false,
+                        Data = uniqIdsNotInAccessListActual.ToString(),
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "მოხდა შეცდომა ! Excel და Access რაოდენობა არ ემთხვევა!"
+                    };
+                }
+
+                // Compare directory entries with qarsafaris and windbreakMdbs
+                List<string> directoryEntryList = directoryEntries.Select(de => $"{de.LitterId}-{de.UniqId}").ToList();
+                List<string> qarsafariList = qarsafaris.Select(q => $"{q.LiterId}-{q.UniqId}").ToList();
+                List<string> windbreakMdbList = windbreakMdbs.Select(w => $"{w.LiterId}-{w.UniqId}").ToList();
+
+                var missingInDirectory = qarsafariList.Concat(windbreakMdbList).Except(directoryEntryList).ToList();
+                var missingInDatabase = directoryEntryList.Except(qarsafariList.Concat(windbreakMdbList)).ToList();
+
+                // aleks
+                //if (missingInDirectory.Any() || missingInDatabase.Any())
+                //{
+                //    uniqIdsNotInAccessListActual.AddRange(missingInDirectory.Select(item => $"{item} (Missing in Directory)"));
+                //    uniqIdsNotInAccessListActual.AddRange(missingInDatabase.Select(item => $"{item} (Missing in Database)"));
+
+                //    return new Result<string?>
+                //    {
+                //        Success = false,
+                //        Data = uniqIdsNotInAccessListActual.ToString(),
+                //        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                //        Message = "მოხდა შეცდომა ! Directory და Database რაოდენობა არ ემთხვევა!"
+                //    };
+                //}
+
+                return new Result<string?>
+                {
+                    Success = true,
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Message = "წარნატებით დასრულდა შემოწმება access, excel და directory-ის"
+                };
             }
             catch
             {
                 return new Result<string?>
                 {
+                    Data = uniqIdsNotInAccessListActual.ToString(),
                     Success = false,
                     StatusCode = System.Net.HttpStatusCode.BadGateway,
-                    Message = "წარუმატებლად შესრულდა შემოწმება access და excel uniqid-ის "
+                    Message = "წარუმატებლად შესრულდა შემოწმება access, excel და directory-ის"
                 };
             }
         }
+
+
+
+
+
         #endregion
+
+
+
+
         // ფუნქცია გამოიყენება რომ შეავსოს ველები სადაც გვიწერია პროექტის(მუნიციპალიტეტის) დასახელება და ეტაპის ნუმერაცია 
         public Result<string?> FillProjectEtapiIDS(int ProjectNameID, int EtapiID)
         {
@@ -823,7 +1007,8 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 {
                     if (excel.IsUniqLiterNull == "true")
                     {
-                        WindbreakMdb access = geographicDynamicDbContext.WindbreakMdbs.FirstOrDefault(x => x.LiterId == excel.LiterId && x.UniqId == excel.UniqIdOld);
+                        WindbreakMdb access = geographicDynamicDbContext.WindbreakMdbs.FirstOrDefault(x => x.LiterId == excel.LiterId && x.UniqId == excel.UniqId); // თეთრიწყარო
+                        //WindbreakMdb access = geographicDynamicDbContext.WindbreakMdbs.FirstOrDefault(x => x.LiterId == excel.LiterId && x.UniqId == excel.UniqIdOld);
                         if (access != null)
                         {
                             foreach (var ColumnName in geographicDynamicDbContext.ColumnNames)
@@ -947,27 +1132,20 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
             var geographicDynamicDbContext = new GeographicDynamicDbContext();
             try
             {
-                #region ALEKS
+
+                #region ALEKS NEW TETRITSKARO
                 List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris.ToList();
-                //UniqId გადაგვაქვს UniqIdOld -ში ძველი უნიკიდის შესანახად
-                foreach (var qarsafari in qarsafaris)
-                {
-                    if (qarsafari.IsUniqLiterNull == "true")
-                    {
-                        qarsafari.UniqIdOld = Convert.ToInt32(qarsafari.UniqId);
-                    }
-                }
-                geographicDynamicDbContext.SaveChanges();
 
                 //გადანომრვა
-                var newUniqueID = UnicIDStartNumber - 1;
+                
                 //გლობალურად ვინათავთ ლიტერაიდის რომ შემდეგ იტერაციაში გამოვიყენოთ 
                 Double? literid = null;
+                Double? newUniqueID = null;
                 foreach (var qarsafari in qarsafaris)
                 {
                     if (qarsafari.IsUniqLiterNull == "true")
                     {
-                        newUniqueID++;
+                        newUniqueID = qarsafari.UniqId;
                         //აქ იღებს ლიტერაიდი მნიშვნელობას როდესაც ზედა if პირობა სრულდება მაშინ იცვლის მნიშვნელობას 
                         literid = qarsafari.LiterId;
                     }
@@ -979,6 +1157,40 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 //ვიმახსოვრებთ შედეგებს 
                 geographicDynamicDbContext.SaveChanges();
                 #endregion
+
+
+                //#region ALEKS
+                //List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris.ToList();
+                ////UniqId გადაგვაქვს UniqIdOld -ში ძველი უნიკიდის შესანახად
+                //foreach (var qarsafari in qarsafaris)
+                //{
+                //    if (qarsafari.IsUniqLiterNull == "true")
+                //    {
+                //        qarsafari.UniqIdOld = Convert.ToInt32(qarsafari.UniqId);
+                //    }
+                //}
+                //geographicDynamicDbContext.SaveChanges();
+
+                ////გადანომრვა
+                //var newUniqueID = UnicIDStartNumber - 1;
+                ////გლობალურად ვინათავთ ლიტერაიდის რომ შემდეგ იტერაციაში გამოვიყენოთ 
+                //Double? literid = null;
+                //foreach (var qarsafari in qarsafaris)
+                //{
+                //    if (qarsafari.IsUniqLiterNull == "true")
+                //    {
+                //        newUniqueID++;
+                //        //აქ იღებს ლიტერაიდი მნიშვნელობას როდესაც ზედა if პირობა სრულდება მაშინ იცვლის მნიშვნელობას 
+                //        literid = qarsafari.LiterId;
+                //    }
+                //    qarsafari.UniqId = newUniqueID;
+
+                //    //აქ უკვე იწერება ქარსაფარში 
+                //    qarsafari.LiterId = literid;
+                //}
+                ////ვიმახსოვრებთ შედეგებს 
+                //geographicDynamicDbContext.SaveChanges();
+                //#endregion
                 #region GIO
                 //List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris.OrderBy(x => x.LiterId).ThenBy(x => x.UniqId).ToList();
 
@@ -1553,7 +1765,8 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     foreach (var item in GeographicDynamicDbContext.QarsafariGroupeds)
                     {
                         // Find corresponding row in Access table
-                        System.Data.DataRow[] rows = dataTable.Select($"{uniqid} = '{item.UniqIdOld}' AND {literid} = '{item.LiterId}'");
+                        System.Data.DataRow[] rows = dataTable.Select($"{uniqid} = '{item.UniqId}' AND {literid} = '{item.LiterId}'"); // თეთრიწყარო
+                        //System.Data.DataRow[] rows = dataTable.Select($"{uniqid} = '{item.UniqIdOld}' AND {literid} = '{item.LiterId}'");
                         if (rows.Length > 0)
                         {
                             rows[0]["Photo_N"] = item.PhotoN;
@@ -2303,8 +2516,8 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
                     if (!string.IsNullOrEmpty(excelUniqId) && !string.IsNullOrEmpty(excelLitterId))
                     {
-                        var matchedData = dbData.FirstOrDefault(item => item.UniqIdOld.ToString() == excelUniqId && item.LiterId.ToString() == excelLitterId);
-
+                        var matchedData = dbData.FirstOrDefault(item => item.UniqId.ToString() == excelUniqId && item.LiterId.ToString() == excelLitterId);//თეთრიწყარო
+                        //var matchedData = dbData.FirstOrDefault(item => item.UniqIdOld.ToString() == excelUniqId && item.LiterId.ToString() == excelLitterId);
                         if (matchedData != null)
                         {
                             worksheet.Cells[i, column].Value = matchedData.UniqId;
