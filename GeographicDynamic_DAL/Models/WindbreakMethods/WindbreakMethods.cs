@@ -2,6 +2,7 @@
 using GeographicDynamicWebAPI.Wrappers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Office.Interop.Excel;
 using Microsoft.VisualBasic;
 using System;
@@ -14,6 +15,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace GeographicDynamic_DAL.Models.WindbreakMethods
@@ -108,7 +110,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     Qarsafari qarsafari = new Qarsafari();
 
                     // თუ უნიკიდ ან ლიტერ აიდი ცარიელია მაშინ ჩაიწერება false თუ არაა ცარიელი მაშინ true
-                    if (String.IsNullOrEmpty(Convert.ToString(xlRange.Cells[i, "A"].Value2)) || String.IsNullOrEmpty(Convert.ToString(xlRange.Cells[i, "B"].Value2)))
+                    if (System.String.IsNullOrEmpty(Convert.ToString(xlRange.Cells[i, "A"].Value2)) || System.String.IsNullOrEmpty(Convert.ToString(xlRange.Cells[i, "B"].Value2)))
                     {
                         qarsafari.IsUniqLiterNull = "false";
 
@@ -314,7 +316,49 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
         }
         //// ეს ფუქნცია ამოწმებს excel და access ცხრილებს და ადარებს UNIQID ებს თუ ემთხვევა ერთმანეთს 
 
+        public Result<double?> ShemowmebaSaveleOperatori()
+        {
+            GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
+            List<string> distinctUniqIds = geographicDynamicDbContext.Qarsafaris
+                                                                            .Where(x => x.IsUniqLiterNull == "true" && (x.FieldOperator == null || x.FieldOperator == ""))
+                                                                            .Select(q => $"{q.UniqId}-{q.LiterId}-{q.UniqIdOld} (old)")
+                                                                            .ToList();
 
+            try
+            {
+
+                if (distinctUniqIds.Count < 1)
+                {
+                    return new Result<double?>
+                    {
+                        Success = true,
+                        // Data = uniqIdsNotInAccessList,
+                        StatusCode = System.Net.HttpStatusCode.OK,
+                        Message = "ჩაიწერა საველო ოპერატორი !"
+                    };
+                }
+                else
+                {
+                    return new Result<double?>
+                    {
+                        Success = false,
+                        //Data = distinctUniqIds,
+                        StatusCode = System.Net.HttpStatusCode.BadGateway,
+                        Message = "არ ჩაიწერა საველო ოპერატორი !"
+                    };
+                }
+            }
+            catch
+            {
+                return new Result<double?>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "წარუმატებლად დასრულდა შემოწმება საველე ოპერატორის"
+
+                };
+            }
+        }
 
         #region მოწმდება MDB Excel და fotoebi და გამოქავს შედეგი თუ სადმე ცხრილებს შორის დუბლიკატია ანდა რამე ზედმეტი ან ნაკლებია
         public Result<string?> ShemowmebaAccessExcelUnicLiterDublicats()
@@ -784,7 +828,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 List<WindbreakMdb> windbreakMdbs = GeographicDynamicDbContext.WindbreakMdbs.ToList();
                 foreach (var item in windbreakMdbs)
                 {
-                    item.Uid = String.Concat(item.LiterId, item.UniqId);
+                    item.Uid = System.String.Concat(item.LiterId, item.UniqId);
                     GeographicDynamicDbContext.SaveChanges();
 
                 }
@@ -1324,7 +1368,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 List<QarsafariGrouped> qarsafariGroupeds = GeographicDynamicDbContext.QarsafariGroupeds.ToList();
                 foreach (var item in qarsafariGroupeds)
                 {
-                    item.Uid = String.Concat(item.LiterId, item.UniqId);
+                    item.Uid = System.String.Concat(item.LiterId, item.UniqId);
                     GeographicDynamicDbContext.SaveChanges();
 
                 }

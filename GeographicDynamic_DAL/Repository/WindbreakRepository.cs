@@ -373,7 +373,7 @@ namespace GeographicDynamic_DAL.Repository
             geographicDynamicDbContext.GadanomriliFotoebis.ExecuteDelete();
             var directories = Directory.GetDirectories(renamePhotoDTO.FolderPath).OrderBy(filePath => int.Parse(Path.GetFileNameWithoutExtension(filePath)));
 
-            //int foldercount = renamePhotoDTO.FolderStartNumber;
+            int foldercount = renamePhotoDTO.FolderStartNumber;
             int photocount = renamePhotoDTO.PhotoStartNumber;
             var random = new Random();
             var tempFolderCount = random.Next(100000, 999999);
@@ -384,10 +384,10 @@ namespace GeographicDynamic_DAL.Repository
                 {
                     #region აქ კეთდება წინასწარ რანდომ რიცხვის მიმატება ფოლდდერების სახელებს მანამ გადანომვრას დავიწყებთ
                     ////ფაილების გადანომვრა 
-                    //foreach (var folderPath in directories)
+                    //foreach (var folderpath in directories)
                     //{                 //ფაილების გადანომვრა რენდომ რიცხვით რომ გამოირიცხოს დუპლიკატი
-                    //    var directories1 = Directory.GetDirectories(folderPath).OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
-                    //    var list = directories1.OrderBy(filePath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filePath)));
+                    //    var directories1 = Directory.GetDirectories(folderpath).OrderBy(filepath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filepath)));
+                    //    var list = directories1.OrderBy(filepath => Convert.ToInt32(Path.GetFileNameWithoutExtension(filepath)));
                     //    foreach (var items in list)
                     //    {
                     //        var idx = items.LastIndexOf('\\');
@@ -600,6 +600,8 @@ namespace GeographicDynamic_DAL.Repository
 
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext();
 
+            
+
             ////////// ჩეკბოქსების გამოტანა ცვლადში რომ ადვილად აიწყოს შემოწმება 
             var CalcVarjisFartiCheckbox = excelReadDTO.CalcVarjisFartiCheckbox;
             var AccessShitNameTextbox = excelReadDTO.AccessShitName;
@@ -669,6 +671,17 @@ namespace GeographicDynamic_DAL.Repository
                     Success = false,
                     StatusCode = System.Net.HttpStatusCode.BadGateway,
                     Message = ShemowmebaAccessExcelUnicLiterDublicatsResult.Message + " ზედმეტია: " + ShemowmebaAccessExcelUnicLiterDublicatsResult.Data[0]
+                };
+            }
+
+            var ShemowmebaSaveleOperatoriResult = _windbreakMethods.ShemowmebaSaveleOperatori();
+            if (ShemowmebaSaveleOperatoriResult.Success == false)
+            {
+                return new Result<bool>
+                {
+                    Success = false,
+                    StatusCode = System.Net.HttpStatusCode.BadGateway,
+                    Message = "მოხდა შეცდომა ქარსაფარში " + ShemowmebaSaveleOperatoriResult.Message,
                 };
             }
 
