@@ -10,10 +10,24 @@ namespace GeographicDynamicWebAPI.Controllers
     {
         /*test*/
         private readonly IWindbreak _windbreak;
+        private readonly IWriteOnImage _writeOnImage;
 
-        public WindbreakController(IWindbreak windbreak)
+        public WindbreakController(IWindbreak windbreak, IWriteOnImage writeOnImage)
         {
             _windbreak = windbreak;
+            _writeOnImage = writeOnImage;
+        }
+
+        [HttpPost("WriteCoordinatesAndDateOnImage")]
+        public IActionResult WriteInfoOnImage(RenamePhotoDTO renamePhotoDTO)
+        {
+            var result = _writeOnImage.WriteInfoOnImage(renamePhotoDTO);
+            if (result != null)
+            {
+                return Ok();
+            }
+            return BadRequest(result);
+
         }
         [HttpPost("RenamePhotosInFolder")]
         public IActionResult RenamePhotosInFolder(RenamePhotoDTO renamePhotoDTO)
