@@ -20,6 +20,7 @@ namespace GeographicDynamic_DAL.DTOs.Windbreak
         public int EtapiID { get; set; }
         public string FolderPath { get; set; }
         public int PhotoStartNumber { get; set; }
+        public bool GadanomriliaUNIQID { get; set; }
         public bool Gadanomrilia { get; set; }
         public bool GadanomriliaFotoebi { get; set; }
     }

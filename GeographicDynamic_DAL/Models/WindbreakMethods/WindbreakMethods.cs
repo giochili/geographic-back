@@ -986,7 +986,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
         }
         //ფუნქცია გამოიყენება რომ დაგაინომროს UNIQ_ID ები ქარსაფარის ცხრილში 
-        public Result<bool> QarsafariGadanomrva(int UnicIDStartNumber)
+        public Result<bool> QarsafariGadanomrva(int UnicIDStartNumber, bool GadanomriliaUNIQID)
         {
             var geographicDynamicDbContext = new GeographicDynamicDbContext();
             try
@@ -1002,26 +1002,55 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     }
                 }
                 geographicDynamicDbContext.SaveChanges();
-
-                //გადანომრვა
-                var newUniqueID = UnicIDStartNumber - 1;
-                //გლობალურად ვინათავთ ლიტერაიდის რომ შემდეგ იტერაციაში გამოვიყენოთ 
-                Double? literid = null;
-                foreach (var qarsafari in qarsafaris)
+                
+                if (GadanomriliaUNIQID != true) //თუ უნიკიდები არაა გადანომრილი მაშინ ვნომრავთ
                 {
-                    if (qarsafari.IsUniqLiterNull == "true")
+                    var newUniqueID = UnicIDStartNumber - 1;
+                    //გლობალურად ვინათავთ ლიტერაიდის რომ შემდეგ იტერაციაში გამოვიყენოთ 
+                    Double? literid = null;
+                    foreach (var qarsafari in qarsafaris)
                     {
-                        newUniqueID++;
-                        //აქ იღებს ლიტერაიდი მნიშვნელობას როდესაც ზედა if პირობა სრულდება მაშინ იცვლის მნიშვნელობას 
-                        literid = qarsafari.LiterId;
-                    }
-                    qarsafari.UniqId = newUniqueID;
+                        if (qarsafari.IsUniqLiterNull == "true")
+                        {
+                            newUniqueID++;
+                            //აქ იღებს ლიტერაიდი მნიშვნელობას როდესაც ზედა if პირობა სრულდება მაშინ იცვლის მნიშვნელობას 
+                            literid = qarsafari.LiterId;
+                        }
+                        qarsafari.UniqId = newUniqueID;
 
-                    //აქ უკვე იწერება ქარსაფარში 
-                    qarsafari.LiterId = literid;
+                        //აქ უკვე იწერება ქარსაფარში 
+                        qarsafari.LiterId = literid;
+                    }
+                    //ვიმახსოვრებთ შედეგებს 
+                    geographicDynamicDbContext.SaveChanges();
                 }
-                //ვიმახსოვრებთ შედეგებს 
-                geographicDynamicDbContext.SaveChanges();
+                else //თუ უნიკიდები გადანომრილია ხელახლა არ ვნომრავთ
+                {
+
+                    Double? UniqueID = null;
+                    //გლობალურად ვინათავთ ლიტერაიდის რომ შემდეგ იტერაციაში გამოვიყენოთ 
+                    Double? literid = null;
+                    foreach (var qarsafari in qarsafaris)
+                    {
+                        if (qarsafari.IsUniqLiterNull == "true")
+                        {
+                            UniqueID = qarsafari.UniqId;
+                            //აქ იღებს ლიტერაიდი მნიშვნელობას როდესაც ზედა if პირობა სრულდება მაშინ იცვლის მნიშვნელობას 
+                            literid = qarsafari.LiterId;
+                        }
+                        qarsafari.UniqId = UniqueID;
+
+                        //აქ უკვე იწერება ქარსაფარში 
+                        qarsafari.LiterId = literid;
+                    }
+                    //ვიმახსოვრებთ შედეგებს 
+                    geographicDynamicDbContext.SaveChanges();
+
+
+                }
+                //გადანომრვა
+
+
                 #endregion
                 #region GIO
                 //List<Qarsafari> qarsafaris = geographicDynamicDbContext.Qarsafaris.OrderBy(x => x.LiterId).ThenBy(x => x.UniqId).ToList();
@@ -1898,7 +1927,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
         List<storedMDB> excelDataList = new List<storedMDB>();
 
         //ფუნქცია კითხულობს ბაზას და ქმნის ახალ ექსელის ფაილს რომ ჩაიწეროს მონაცემები მხოლოდ დაგრუპულისთვის 
-        public Result<bool> WriteToExcelGrouped(List<QarsafariGrouped> qarsafariGroupeds, string ExcelDestinationPath, string ExcelName,string AccessPath,string AccessSheetName)
+        public Result<bool> WriteToExcelGrouped(List<QarsafariGrouped> qarsafariGroupeds, string ExcelDestinationPath, string ExcelName, string AccessPath, string AccessSheetName)
         {
 
             GeographicDynamicDbContext geographicDynamicDbContext = new GeographicDynamicDbContext(); //უკავშირდება კონტექსტს რომ გაიგოს ცხრილები SQL-დან 
@@ -1964,13 +1993,13 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         }
                     }
                 }
-               
 
 
 
 
 
-                    ExcelWorkSheet = ExcelWorkBook.Worksheets[1]; // აქ ვირჩევთ სამუშაო შიტს ვორკბუკიდან(ექსელიდან) ჩვენ შემთხვევაში ერთია და მაგიტომ გვაქ Worksheets[1} ინდექსად 1 
+
+                ExcelWorkSheet = ExcelWorkBook.Worksheets[1]; // აქ ვირჩევთ სამუშაო შიტს ვორკბუკიდან(ექსელიდან) ჩვენ შემთხვევაში ერთია და მაგიტომ გვაქ Worksheets[1} ინდექსად 1 
 
 
                 // ამ კოდის ფრაგმენტებში ივსება სათაურის ველები სხვა სიტყვებით რომ ვთქვათ პირველ row-ში იწერება მნიშვნელობები რამდენი სვეტიც გვაქ (column) 
@@ -2310,7 +2339,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 }
 
                 // Find the column index for "Uniq_Id_MDB"
-                while (worksheet.Cells[1, column+1].Value != null && worksheet.Cells[1, column+1].Value.ToString() != "Uniq_Id_MDB")
+                while (worksheet.Cells[1, column + 1].Value != null && worksheet.Cells[1, column + 1].Value.ToString() != "Uniq_Id_MDB")
                 {
                     column++;
                 }
@@ -2366,7 +2395,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
 
                         }
                     }
-                    
+
                 }
 
                 // Save changes and cleanup

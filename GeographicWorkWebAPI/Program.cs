@@ -46,13 +46,27 @@ builder.Services.AddTransient<IChromeBot, ChromeBotRepository>();
 builder.Services.AddAutoMapper(typeof(MapperConfig));
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+var basePath = "/GeographicWorkBack";
+
+app.UsePathBase(basePath);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
-
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint($"{basePath}/swagger/v1/swagger.json", "My API V1");
+        c.RoutePrefix = "swagger";
+    });
 }
+
+//// Configure the HTTP request pipeline.
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+
+//}
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
