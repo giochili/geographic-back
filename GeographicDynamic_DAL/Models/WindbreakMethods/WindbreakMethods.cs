@@ -1556,6 +1556,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                         System.Data.DataRow[] rows = dataTable.Select($"{uniqid} = '{item.UniqIdOld}' AND {literid} = '{item.LiterId}'");
                         if (rows.Length > 0)
                         {
+                            rows[0]["UNIQ_ID"] = item.UniqId;
                             rows[0]["Photo_N"] = item.PhotoN;
                             rows[0]["shrubbery"] = item.Shrubbery;
                             rows[0]["Woody_plant_percent"] = item.WoodyPlantPercent;
@@ -1568,6 +1569,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                             rows[0]["Company"] = item.Company;
                             rows[0]["Field_Operator"] = item.FieldOperator;
                             rows[0]["Date_"] = item.Date;
+                            rows[0]["UNIQ_ID_OLD"] = item.UniqIdOld;
                             rows[0][newColumnName] = item.UniqId;
                         }
                     }
@@ -1943,7 +1945,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                 ExcelWorkSheet.Cells[1, "J"] = "shrubbery";
                 ExcelWorkSheet.Cells[1, "K"] = "Woody_plant_percent";
                 ExcelWorkSheet.Cells[1, "L"] = "Woody_plant_quantity";
-                ExcelWorkSheet.Cells[1, "M"] = "VarjisFarti";
+                //ExcelWorkSheet.Cells[1, "M"] = "VarjisFarti";
                 ExcelWorkSheet.Cells[1, "N"] = "woody_plant_species";
                 ExcelWorkSheet.Cells[1, "O"] = "In_good_condition";
                 ExcelWorkSheet.Cells[1, "P"] = "chopped_down";
@@ -1992,7 +1994,7 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
                     ExcelWorkSheet.Cells[r + 2, "J"] = qarsafariGroupeds[r].Shrubbery;
                     ExcelWorkSheet.Cells[r + 2, "K"] = qarsafariGroupeds[r].WoodyPlantPercent;
                     ExcelWorkSheet.Cells[r + 2, "L"] = qarsafariGroupeds[r].WoodyPlantQuantity;
-                    ExcelWorkSheet.Cells[r + 2, "M"] = qarsafariGroupeds[r].VarjisFarti;
+                    //ExcelWorkSheet.Cells[r + 2, "M"] = qarsafariGroupeds[r].VarjisFarti;
                     ExcelWorkSheet.Cells[r + 2, "N"] = qarsafariGroupeds[r].WoodyPlantSpecies;
 
                     // სადაც სახეობა არ გვიწერია და ხეხილის რაოდენობა იქ იწერება კარგ მდომარეობაში 0 
@@ -2350,8 +2352,17 @@ namespace GeographicDynamic_DAL.Models.WindbreakMethods
         // ამრგვალებს 5 ის ჯერადზე გადაცემულ რიცხვს
         static int RoundToNearest(double number)
         {
+            try
+            {
+
             int i = Convert.ToInt32(number);
             return (i % 5) == 0 ? i : (i % 5) >= 2.5 ? i + 5 - (i % 5) : i - (i % 5);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"მოხდა შეცდომა რიცხვი გაიყო ნულზე საშუალო ხმოვანობაში სავარაუდოდ ! : {ex.Message}");
+                return 0; 
+            }
         }
         #endregion
     }
