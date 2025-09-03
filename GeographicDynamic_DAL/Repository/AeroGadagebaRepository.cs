@@ -106,7 +106,7 @@ namespace GeographicDynamic_DAL.Repository
                             File.Move(file, destFile, true);
                         }
                     }
-                    catch
+                    catch(Exception ex)
                     {
                         continue;
                     }
@@ -138,7 +138,7 @@ namespace GeographicDynamic_DAL.Repository
                             WriteCoordinates(imagePathFile, match.X, match.Y);
                         }
                     }
-                    catch
+                    catch(Exception ex)
                     {
                         continue;
                     }
@@ -192,7 +192,6 @@ namespace GeographicDynamic_DAL.Repository
                         g.DrawString(text, font, Brushes.White, xPos + 1, yPos + 1);
                         g.DrawString(text, font, Brushes.Black, xPos, yPos);
                     }
-
                     // Save with proper format
                     img.Save(imagePath, original.RawFormat);
                 }
