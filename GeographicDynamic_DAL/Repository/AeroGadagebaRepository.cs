@@ -112,24 +112,33 @@ namespace GeographicDynamic_DAL.Repository
                     // skip unreadable images
                 }
             }
-
-            // Step 2: Move images into ObjectID folders
-            foreach (var record in excelData)
+            // Step 2: Move images into ObjectID folders using time ranges
+            for (int i = 0; i < excelData.Count; i++)
             {
-                if (record.DataTaken == null) continue;
-                DateTime targetTime = record.DataTaken.Value;
+                var currentRecord = excelData[i];
+                if (currentRecord.DataTaken == null) continue;
+
+                DateTime startTime = currentRecord.DataTaken.Value;
+                DateTime? endTime = (i < excelData.Count - 1)
+                                    ? excelData[i + 1].DataTaken
+                                    : null; // no upper limit for the last one
+
+                // Always create folder for current ObjectID
+                string targetFolder = Path.Combine(imagePath, currentRecord.ObjectID);
+                if (!Directory.Exists(targetFolder))
+                    Directory.CreateDirectory(targetFolder);
 
                 foreach (var kvp in fileDates)
                 {
                     string file = kvp.Key;
                     DateTime photoDate = kvp.Value;
 
-                    if (Math.Abs((photoDate - targetTime).TotalMinutes) <= 5)
-                    {
-                        string targetFolder = Path.Combine(imagePath, record.ObjectID);
-                        if (!Directory.Exists(targetFolder))
-                            Directory.CreateDirectory(targetFolder);
+                    bool inRange = endTime.HasValue
+                        ? (photoDate >= startTime && photoDate < endTime.Value)
+                        : (photoDate >= startTime); // last range gets all remaining images
 
+                    if (inRange)
+                    {
                         string destFile = Path.Combine(targetFolder, Path.GetFileName(file));
                         try
                         {
@@ -143,6 +152,7 @@ namespace GeographicDynamic_DAL.Repository
                     }
                 }
             }
+
 
             // Step 3: Write coordinates on images
             var objectFolders = Directory.GetDirectories(imagePath);
